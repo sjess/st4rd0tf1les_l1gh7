@@ -1,0 +1,173 @@
+#!/bin/bash
+
+printf "${NORMAL}\n [ START ] Update & Upgrade"
+starttime=$(date +%s)
+trap '' 2
+sudo apt -y upgrade && sudo apt -y dist-upgrade
+trap 2
+endtime=$(date +%s)
+printf " [ DONE ] Update & Upgrade ... %s seconds\n" "$((endtime - starttime))"
+printf "\n [ START ] Installing common requirements"
+starttime=$(date +%s)
+apps=(
+    software-properties-common
+    build-essential
+    apt-transport-https
+    git
+    curl
+    unzip
+    libssl-dev
+    ca-certificates
+    ffmpeg
+)
+trap '' 2
+sudo apt -y install "${apps[@]}"
+trap 2
+unset apps
+endtime=$(date +%s)
+printf " [ DONE ] common requirements ... %s seconds\n" "$((endtime - starttime))"
+
+printf "\n\n Install PHP"
+printf "\n ------------------"
+printf "\n Install PHP? (y/n) "
+read -p 'Answer: '  reply
+
+if [[ $reply =~ ^[Yy]$ ]]
+then
+    sudo apt install software-properties-common -y
+    sudo add-apt-repository ppa:ondrej/php -y
+    sudo apt update -y
+    sudo apt install php php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-imagick php-mbstring php-curl php-xml php-xmlrpc php-curl php-pear php-bcmath php-imap php-mbstring php7.4-opcache php-zip php-intl -y
+    php -v
+fi
+
+# Install python
+echo 'Install Phython & PIP'
+echo '-----------------'
+sudo apt install python-minimal -y
+sudo apt install python-pip -y
+python --version
+pip --version
+
+# Install python
+echo 'Install diverse Libs'
+echo '-----------------'
+sudo apt-get install gconf-service libasound2 libatk1.0-0 libatk-bridge2.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget -y
+
+# Install zsh
+echo 'Install oh-my-zsh'
+echo '-----------------'
+sudo apt install zsh -y
+sudo chsh -s /usr/bin/zsh
+curl -L https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+
+# Install powerlevel9k
+echo 'Install Powerlevel 10K'
+echo '-----------------'
+git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/.oh-my-zsh/custom/themes/powerlevel10k
+
+# Install Powerline-Symbols
+echo 'Install Powerline-Symbols'
+echo '-----------------'
+sudo apt-get install fontconfig -y
+wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf
+wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf
+mkdir -p  ~/.local/share/fonts/
+mkdir -p ~/.config/fontconfig/conf.d/
+mv PowerlineSymbols.otf ~/.local/share/fonts/
+sudo fc-cache -vf ~/.local/share/fonts/
+mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/
+
+# Install zsh-autosuggestions
+echo 'Install zsh-autosuggestions'
+echo '-----------------'
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+# Install zsh-syntax-highlighting
+echo 'Install zsh-syntax-highlighting'
+echo '-----------------'
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+# Symlink zsh prefs
+rm ~/.zshrc
+ln -s ~/.dotfiles/shell/.wsl2 ~/.zshrc
+
+# Symlink warp prefs
+rm ~/.warprc
+ln -s ~/.dotfiles/shell/.warprc ~/.warprc
+
+#Copy WSL config
+sudo cp ~/.dotfiles/shell/wsl.conf /etc/wsl.conf
+
+echo 'Install composer'
+echo '----------------'
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php -r "if (hash_file('sha384', 'composer-setup.php') === 'c31c1e292ad7be5f49291169c0ac8f683499edddcfd4e42232982d0fd193004208a58ff6f353fde0012d35fdd72bc394') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php composer-setup.php
+php -r "unlink('composer-setup.php');"
+sudo mv composer.phar /usr/local/bin/composer
+
+echo 'Install node.js'
+echo '----------------'
+sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
+curl -sL https://deb.nodesource.com/setup_15.x | sudo -E bash -
+sudo apt install nodejs -y
+nodejs -v
+
+echo 'Install Global NPM Packages'
+echo '----------------'
+sudo npm i @vue/cli
+sudo npm i @vue/cli-service-global
+sudo npm install -g eslint
+sudo npm install -g ffmpeg-progressbar-cli
+
+printf "\n Config personal things (Y/n): "
+read -r personalconfig
+if [ -z "${personalconfig}" ] || [ "${personalconfig}" == Y ] || [ "${personalconfig}" == y ]; then
+    printf "\n Your Name (Default: Stephan Jess): "
+    read -r username
+    if [ -z "${username}" ]; then
+        username="Stephan Jess"
+        echo "$username"
+    fi
+    git config --global user.name "${username}"
+
+    printf "\n Your E-Mail (Default: s.jess@novagraphix.de): "
+    read -r email
+    if [ -z "${email}" ]; then
+        email="s.jess@novagraphix.de"
+        echo "$email"
+    fi
+    git config --global user.email "${email}"
+
+    if [ ! -d ~/.ssh ]; then
+        ssh-keygen -t rsa -b 4096 -C "${email}"
+    fi
+fi
+printf "\n SSH-Key generated in ~/.ssh\n"
+
+printf "\n [ START ] Cleaning"
+starttime=$(date +%s)
+trap '' 2
+sudo apt -y autoremove && sudo apt -y autoclean && sudo apt -y clean
+trap 2
+endtime=$(date +%s)
+printf " [ DONE ] Cleaning ... %s seconds\n" "$((endtime - starttime))"
+endtotaltime=$(date +%s)
+printf "\n Total Execution Time ... %s seconds\n" "$((endtotaltime - starttotaltime))\n"
+
+# Change Shell
+chsh -s $(which zsh)
+zsh
+source ~/.zshrc
+
+echo "${GREEN}++++++++++++++++++++++++++++++"
+echo '++++++++++++++++++++++++++++++'
+echo 'All done! Restart Console!'
+echo 'Things to do to make the terminal theme work:'
+echo "${RED}1. Install (Windows) FiraCode patched font included in ~/.dotfiles/misc${GREEN}"
+echo '++++++++++++++++++++++++++++++'
+echo 'Some optional tidbits'
+echo "${RED}1. Make a .dotfiles-custom/shell/.aliases for your personal commands${GREEN}"
+echo '++++++++++++++++++++++++++++++'
+echo '++++++++++++++++++++++++++++++'

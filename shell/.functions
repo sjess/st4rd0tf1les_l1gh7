@@ -1,0 +1,142 @@
+# Commit all
+commit ()
+{
+  commitMessage="$1"
+
+  if [ "$commitMessage" = "" ]; then
+     commitMessage="fast commit & push"
+  fi
+
+  git pull && git add .
+  eval "git commit -a -m '${commitMessage}'"
+  git push
+}
+
+# Deploy to GCP
+gcpush()
+{
+    gcloud config set project $1 && gcloud builds submit --tag gcr.io/$1/$2 && gcloud beta run deploy $2 --image --platform managed gcr.io/$1/$2
+}
+
+# Create a new directory and enter it
+mkd()
+{
+   mkdir -p "$@" && cd "$@"
+}
+
+archive()
+{
+   zip -r "$1".zip -i "$1" ;
+}
+
+weather()
+{
+   city="$1"
+
+   if [ -z "$city" ]; then
+      city="Flensburg"
+   fi
+
+   eval "curl http://wttr.in/${city}"
+}
+
+#Docker
+dri() { docker rmi $(docker images -q); }
+
+# Make Database
+dmdb() {
+   echo "Type name of container [novagraphix-mysql57]:"
+   read container
+   container=${container:-novagraphix-mysql57}
+
+   echo "Type name of volume [mysql57-data]:"
+   read volume
+   volume=${volume:-mysql57-data}
+
+   echo "Type name of mysql-image from docker [mysql:5.7]:"
+   read image
+   image=${image:-mysql:5.7}
+
+   echo "Type port [3306]:"
+   read port
+   port=${port:-3306}
+
+   docker run --restart always --name $container -v $volume:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=true -p $port:3306 -d $image
+}
+
+dmysql() {
+   docker run --restart always --name novagraphix-mysql57 -v mysql57-data:/var/lib/mysql -e MYSQL_ALLOW_EMPTY_PASSWORD=true -p 3306:3306 -d mysql:5.7
+}
+
+dapache() {
+   docker run --restart always --name novagraphix-apache --mount type=bind,source=/home/sjess/repositories,target=/app -p 80:80 -d webdevops/php-apache:7.3
+}
+
+# Database Restore
+dbr() {
+   echo "First run? [yn]:"
+   read yn
+
+   case $yn in
+        [Yy]* ) dmdb; ;;
+        [Nn]* ) ;;
+        * ) echo "Please answer yes or no.";;
+    esac
+   
+    printf "Type name of volume [mysql57-data]:"; volume=$(getvolume);
+
+    docker run --rm -v $volume:/var/lib/mysql -v /c/users/s.jess/Google\ Drive/WSL\ Backup/:/backup alpine sh -c "rm -rf /var/lib/mysql/* ; tar -C /var/lib/mysql/ -xjf /backup/$volume.tar.bz2"
+}
+
+# Backup Database
+dbu() {
+   echo "List of Volumes"
+   dvl
+   echo "Type name of backup without extensions [myqsl57-data]:"
+   read backup
+   backup=${backup:-mysql57-data}
+   docker run --rm -v $backup:/var/lib/mysql -v /c/users/s.jess/Google\ Drive/WSL\ Backup/:/backup alpine tar -cjf /backup/$backup.tar.bz2 -C /var/lib/mysql ./
+}
+
+dvr() {
+   docker volume rm $1
+}
+
+dsr() {
+   docker stop $1 && docker rm $1
+}
+
+getvolume() {
+   read volume
+   volume=${volume:-mysql57-data}
+   echo $volume
+}
+
+ds() {
+   docker start $1
+}
+
+repo() {
+   cd ~/repositories
+   find ./ -maxdepth 4 -type d -name .git -exec sh -c "cd \"{}\"/../ && pwd && git pull" \;
+}
+
+archive-full() {
+   echo "Select source clip"
+
+   files=(*)
+
+   select filename in ${files}; do echo "You selected ${filename}"; break; done
+
+   mkdir -p _nova_archive
+
+   ffmpeg-bar -i ${filename} -acodec copy -vcodec copy -f mov _nova_archive/xlarge.mov
+
+   ffmpeg-bar -i ${filename} -preset slow -codec:a aac -b:a 128k -codec:v libx264 -pix_fmt yuv420p -b:v 6000k -minrate 6000k -maxrate 9000k -bufsize 9000k -vf scale=-2:1080 _nova_archive/xlarge.mp4
+
+   ffmpeg-bar -i ${filename} -preset slow -codec:a aac -b:a 128k -codec:v libx264 -pix_fmt yuv420p -b:v 3500k -minrate 2500k -maxrate 3500k -bufsize 5000k -vf scale=-2:720 _nova_archive/medium.mp4
+
+   ffmpeg-bar -i ${filename} -preset slow -codec:a aac -b:a 128k -codec:v libx264 -pix_fmt yuv420p -b:v 1000k -minrate 500k -maxrate 2000k -bufsize 2000k -vf scale=-2:480 _nova_archive/small.mp4
+   
+   ffmpeg-bar -i ${filename} -preset slow -codec:a aac -b:a 128k -codec:v libx264 -pix_fmt yuv420p -b:v 2000k -minrate 2000k -maxrate 3000k -bufsize 2000k -vf scale=-2:1080 ${filename%.*}_pictures.mp4
+}
