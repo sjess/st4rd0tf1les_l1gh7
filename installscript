@@ -3,7 +3,7 @@
 printf "${NORMAL}\n [ START ] Update & Upgrade"
 starttime=$(date +%s)
 trap '' 2
-sudo apt -y upgrade && sudo apt -y dist-upgrade
+sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 trap 2
 endtime=$(date +%s)
 printf " [ DONE ] Update & Upgrade ... %s seconds\n" "$((endtime - starttime))"
@@ -13,10 +13,11 @@ apps=(
     software-properties-common
     build-essential
     apt-transport-https
-    git
     curl
     unzip
     libssl-dev
+    lsb-release
+    apt-transport-https
     ca-certificates
     ffmpeg
 )
@@ -35,7 +36,8 @@ read -p 'Answer: '  reply
 if [[ $reply =~ ^[Yy]$ ]]
 then
     sudo apt install software-properties-common -y
-    sudo add-apt-repository ppa:ondrej/php -y
+    sudo wget -O /etc/apt/trusted.gpg.d/php.gpg https://packages.sury.org/php/apt.gpg
+    echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/php.list
     sudo apt update -y
     sudo apt install php php-cli php-fpm php-json php-common php-mysql php-zip php-gd php-imagick php-mbstring php-curl php-xml php-xmlrpc php-curl php-pear php-bcmath php-imap php-mbstring php7.4-opcache php-zip php-intl -y
     php -v

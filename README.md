@@ -5,15 +5,7 @@
 
 # WSL
 
-[WSL 2 Installation](https://docs.microsoft.com/de-de/windows/wsl/wsl2-install)
-
-Open Powershell as Admin
-
-`Enable-WindowsOptionalFeature -Online -FeatureName Microsoft-Windows-Subsystem-Linux`
-
-`curl.exe -L -o ubuntu-2004.appx https://aka.ms/wsl-ubuntu-2004`
-
-`Add-AppxPackage .\ubuntu-2004.appx`
+Install 'Debian' from the Microsoft Store and run it.
 
 ## Switching to WSL 2
 
@@ -53,6 +45,8 @@ Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
 You can install them by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script. Choose between WSL or WSL 2.
 
 ```batch
+sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
+sudo apt -y git
 git clone https://github.com/sjess/st4rd0tf1les_light.git .dotfiles
 cd .dotfiles
 ./start
