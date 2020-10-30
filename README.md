@@ -69,7 +69,7 @@ and add following line to `/etc/sudoers`
 
 ## Installation
 
-You can install them by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script. Choose between WSL or WSL 2.
+You can install it by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script.
 
 ```batch
 sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
