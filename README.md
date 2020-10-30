@@ -53,7 +53,7 @@ Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
 You can install them by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script. Choose between WSL or WSL 2.
 
 ```batch
-git clone https://github.com/sjess/st4rd0tf1les_light.git .dotfiles
+git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git .dotfiles
 cd .dotfiles
 ./start
 ```
