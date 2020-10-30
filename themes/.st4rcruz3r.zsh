@@ -241,7 +241,7 @@ POWERLEVEL9KGT_BLUE=004
 
   ##################################[ dir: current directory ]##################################
   # Current directory background color.
-  typeset -g POWERLEVEL9K_DIR_BACKGROUND=0
+  typeset -g POWERLEVEL9K_DIR_BACKGROUND=232
   # Default current directory foreground color.
   typeset -g POWERLEVEL9K_DIR_FOREGROUND=15
   # If directory is too long, shorten some of its segments to the shortest possible unique
@@ -497,8 +497,8 @@ POWERLEVEL9KGT_BLUE=004
 
   ###################[ command_execution_time: duration of the last command ]###################
   # Execution time color.
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=234
-  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=0
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_FOREGROUND=236
+  typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_BACKGROUND=232
   # Show duration of the last command if takes longer than this many seconds.
   typeset -g POWERLEVEL9K_COMMAND_EXECUTION_TIME_THRESHOLD=3
   # Show this many fractional digits. Zero means round to seconds.
