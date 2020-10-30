@@ -21,3 +21,5 @@ done
 unset file
 
 . $HOME/.dotfiles/shell/z.sh
+
+export EDITOR=code
