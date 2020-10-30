@@ -40,18 +40,6 @@ The distro that you've chosen above should now display a '2' under the 'version'
 
 Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
 
-## Installation
-
-You can install them by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script. Choose between WSL or WSL 2.
-
-```batch
-sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
-sudo apt -y git
-git clone https://github.com/sjess/st4rd0tf1les_light.git .dotfiles
-cd .dotfiles
-./start
-```
-
 ## Misc
 
 ### SUDO
