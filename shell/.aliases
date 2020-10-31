@@ -11,6 +11,8 @@ alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
 alias yw="yarn watch"
 alias gw="gulp watch"
 alias nrw="npm run watch"
+alias nrs="npm run serve"
+alias nrb="npm run build"
 alias nrp="npm run production"
 
 # Laravel
@@ -24,7 +26,7 @@ alias ci="composer install"
 alias cda="composer dump-autoload -o"
 
 #Linux
-alias update="sudo apt update -y && sudo apt upgrade -y"
+alias update="sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y"
 alias explorer="explorer.exe ."
 alias l="ls -laF"
 
