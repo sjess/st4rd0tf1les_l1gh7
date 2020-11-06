@@ -12,6 +12,20 @@ commit ()
   git push
 }
 
+release ()
+{
+  commitMessage="$1"
+
+  if [ "$commitMessage" = "" ]; then
+     commitMessage="fast commit"
+  fi
+
+  git pull && git add .
+  eval "git commit -a -m '${commitMessage}'"
+  npm run release
+  git push --follow-tags origin main
+}
+
 # Deploy to GCP
 gcpush()
 {
