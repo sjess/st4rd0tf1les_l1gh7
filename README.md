@@ -3,6 +3,10 @@
 
 #### st4rd0tf1les
 
+# WSL aktivieren
+
+Powershell mit Adminrechten: `dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart`
+
 # WSL
 
 Install 'Debian' from the Microsoft Store and run it.
