@@ -6,15 +6,17 @@
 # WSL aktivieren
 
 Powershell mit Adminrechten
+
 ```
 dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
 dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
 ```
+
 [Updatepaket für den WSL2-Linux-Kernel für x64-Computer](https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi)
 
 # WSL
 
-Install 'Debian' from the Microsoft Store and run it.
+Install `Debian` or `Ubuntu` from the Microsoft Store and run it.
 
 ## Switching to WSL 2
 
@@ -42,24 +44,50 @@ To verify what versions of WSL each distro is using use the following command (o
 
 The distro that you've chosen above should now display a '2' under the 'version' column. Now that you're finished feel free to start using your WSL 2 distro!
 
-## What is used
+---
+
+## Export, Import WSL
+
+Export a clean version to duplicate it, if something fails (switch to windows downloads folder first e.g.):
+
+```
+wsl --export {DISTRO} {ANYNAME}.tar`
+e.g. wsl --export Ubuntu-20.04 ubuntu.tar
+```
+
+Import to a certain location, switch to WSL 2 and add a user, since imports only have root:
+
+```
+wsl --import {NAME_OF_NEW_DISTRO} {LOCATION} {ANYNAME}.tar
+e.g. wsl --import UbuntuDev d:\UbuntuDev ubuntu.tar
+wsl --set-version UbuntuDev 2
+useradd {USERNAME}
+passwd {PASSWORD}
+usermod -aG sudo {USERNAME}
+```
+
+To start WSL with that new username: `wsl --distribution UbuntuDev --user {USERNAME}`
+
+Settings in Microsoft Terminal e.g.: `wsl.exe -d UbuntuDev -u sjess`
+
+# What is used
 
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
 Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
 
-## Misc
+# Misc
 
-### SUDO
+## SUDO
 
 For ease of use, make sure your user is in group sudo
 
 ```batch
-sudo usermod -a -G sudo userName
+sudo usermod -aG sudo userName
 ```
 
-and add following line to `/etc/sudoers`
+and edit the following line in `sudoers` with `sudo nano /etc/sudoers` or `sudo vi /etc/sudoers`
 
 ```batch
 # Allow members of group sudo to execute any command
@@ -68,7 +96,7 @@ and add following line to `/etc/sudoers`
 
 **Now you can sudo without password.**
 
-## Installation
+# Installation
 
 You can install it by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script.
 
@@ -80,22 +108,22 @@ cd .dotfiles
 ./start
 ```
 
-## Microsoft Terminal
+# Microsoft Terminal
 
-Also a good choice: [Windows Terminal](https://github.com/microsoft/terminal/releases)
+Download: [Windows Terminal](https://github.com/microsoft/terminal/releases)
 
-To use WSL with WT put the following into the profile settings (watch the DISTRO and GUID)
+To use WSL with WT put the following into the profile settings (watch the DISTRO, GUID and USERNAME) and don't forget to install the Font `FiraMono Nerd Font Mono` found under `~/.dotfiles/misc` in Windows.
 
 ```json
 {
-  "guid": "*** YOUR GUID ***",
+  "guid": "{YOUR_GUID}",
   "hidden": false,
-  "name": "Ubuntu-20.04",
+  "name": "{YOUR_DISTRO}",
   "source": "Windows.Terminal.Wsl",
   "acrylicOpacity": 0.7,
   "closeOnExit": true,
   "colorScheme": "Campbell",
-  "commandline": "wsl.exe -d Ubuntu-20.04",
+  "commandline": "wsl.exe -d {YOUR_DISTRO}",
   "cursorColor": "#FFFFFF",
   "cursorShape": "bar",
   "fontFace": "FiraMono Nerd Font Mono",
@@ -106,11 +134,11 @@ To use WSL with WT put the following into the profile settings (watch the DISTRO
   "padding": "0, 10, 0, 10",
   "snapOnInput": true,
   "useAcrylic": true,
-  "startingDirectory": "//wsl$/Ubuntu-20.04/home/sjess"
+  "startingDirectory": "//wsl$/{YOUR_DISTRO}/home/{USERNAME}"
 }
 ```
 
-## Move WSL to another Drive
+# Move WSL to another Drive
 
 You can move the distribution to another drive using [lxRunOffline](https://github.com/DDoSolitary/LxRunOffline). Use an elevated Powershell for the following tasks.
 
