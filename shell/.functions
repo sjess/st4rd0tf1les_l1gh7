@@ -135,6 +135,16 @@ repo() {
    find ./ -maxdepth 4 -type d -name .git -exec sh -c "cd \"{}\"/../ && pwd && git pull" \;
 }
 
+warner-mxf() {
+   echo "Select source clip"
+
+   files=(*)
+
+   select filename in ${files}; do echo "You selected ${filename}"; break; done
+
+   ffmpeg-bar -i ${filename} -vcodec libx264 -s 1920x1080 -b:v 20000k warner_mxf.mov
+}
+
 archive-full() {
    echo "Select source clip"
 
