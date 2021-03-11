@@ -61,6 +61,11 @@ Import to a certain location, switch to WSL 2 and add a user, since imports only
 wsl --import {NAME_OF_NEW_DISTRO} {LOCATION} {ANYNAME}.tar
 e.g. wsl --import UbuntuDev d:\UbuntuDev ubuntu.tar
 wsl --set-version UbuntuDev 2
+```
+
+Open new WSL Shell and add User, if it is a fresh install and you are root
+
+```
 useradd {USERNAME}
 passwd {PASSWORD}
 usermod -aG sudo {USERNAME}
@@ -84,7 +89,7 @@ Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
 For ease of use, make sure your user is in group sudo
 
 ```batch
-sudo usermod -aG sudo userName
+sudo usermod -aG sudo {USERNAME}
 ```
 
 and edit the following line in `sudoers` with `sudo nano /etc/sudoers` or `sudo vi /etc/sudoers`
@@ -103,8 +108,8 @@ You can install it by cloning the repository as `.dotfiles` in your home directo
 ```batch
 sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
 sudo apt -y install git
-git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git .dotfiles
-cd .dotfiles
+git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git ~/.dotfiles
+cd ~/.dotfiles
 ./start
 ```
 
