@@ -77,10 +77,17 @@ Settings in Microsoft Terminal e.g.: `wsl.exe -d UbuntuDev -u sjess`
 
 # What is used
 
+## Terminal
+- [youtube-dl](https://youtube-dl.org/)
+- [htop](https://htop.dev/)
+- [ranger](https://github.com/ranger/ranger)
+- [neofetch](https://github.com/dylanaraps/neofetch)
+- [ncdu](https://github.com/rofl0r/ncdu)
+
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
-Script installs ZSH, Composer, Node, NPM, PHP7.4, Python2 & PIP
+Script installs ZSH, Composer, Node, NPM, PHP7.4, Python3 & PIP
 
 # Misc
 
