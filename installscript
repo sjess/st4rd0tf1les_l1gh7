@@ -127,7 +127,7 @@ echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere Composer"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('sha384', 'composer-setup.php') === '756890a4488ce9024fc62c56153228907f1545c228516cbf63f885e036d37e9a59d27d63f46af1d4d07ee0f76181c7d3') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php -r "if (hash_file('sha384', 'composer-setup.php') === '55ce33d7678c5a611085589f1f3ddf8b3c52d662cd01d4ba75c0ee0459970c2200a51f492d557530c71c15d8dba01eae') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
 php composer-setup.php
 php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
@@ -143,13 +143,14 @@ echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere Node, NPM"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
-curl -sL https://deb.nodesource.com/setup_17.x | sudo -E bash -
-sudo apt install nodejs -y
+curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+sudo apt-get install -y nodejs
 nodejs -v
 
 echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere globale NPM Packages"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
+sudo npm install -g yarn
 sudo npm i @vue/cli
 sudo npm i @vue/cli-service-global
 sudo npm install -g eslint
