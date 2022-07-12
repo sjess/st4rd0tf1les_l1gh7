@@ -7,7 +7,7 @@ ZSH_DISABLE_COMPFIX=true
 ZSH_THEME="powerlevel10k/powerlevel10k"
 POWERLEVEL9K_MODE='nerdfont-complete'
 
-plugins=(git zsh-syntax-highlighting wd git-auto-fetch zsh-autosuggestions)
+plugins=(git zsh-syntax-highlighting wd git-auto-fetch zsh-autosuggestions sudo history dirhistory)
 
 source $ZSH/oh-my-zsh.sh
 
