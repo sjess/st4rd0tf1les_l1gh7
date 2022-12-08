@@ -113,8 +113,6 @@ and edit the following line in `sudoers` with `sudo nano /etc/sudoers` or `sudo 
 You can install it by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script.
 
 ```batch
-sudo apt -y update && sudo apt -y upgrade && sudo apt -y dist-upgrade
-sudo apt -y install git
 git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git ~/.dotfiles
 cd ~/.dotfiles
 ./start
