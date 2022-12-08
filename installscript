@@ -224,10 +224,20 @@ echo "${RED}1. (ZSH) Installiere unter Windows den FiraCode patched font, zu fin
 echo "${RED}2. (BASH) run getnf from the terminal and it will represent you with a list of NerdFonts with fzf, select the ones you want, and let it do it's work.${GREEN}"
 echo '++++++++++++++++++++++++++++++'
 
+# Insert --> Read .{files} from .dotfiles
+echo '
+for file in ~/.dotfiles/shell/.{exports,aliases,functions}; do
+    [ -r "$file" ] && [ -f "$file" ] && source "$file"
+done
+unset file
+' >> ~/.bashrc
+
 # Change Shell
 if [[ $zsh =~ ^[Jj]$ ]]
 then
     chsh -s $(which zsh)
     zsh
     source ~/.zshrc
+else
+    source ~/.bashrc
 fi
