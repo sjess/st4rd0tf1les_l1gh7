@@ -80,9 +80,9 @@ Settings in Microsoft Terminal e.g.: `wsl.exe -d UbuntuDev -u sjess`
 ## Terminal
 - [youtube-dl](https://youtube-dl.org/)
 - [htop](https://htop.dev/)
-- [ranger](https://github.com/ranger/ranger)
-- [neofetch](https://github.com/dylanaraps/neofetch)
-- [ncdu](https://github.com/rofl0r/ncdu)
+- [kitty](https://sw.kovidgoyal.net/kitty/)
+- [neovim](https://neovim.io/)
+
 
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k)
