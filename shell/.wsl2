@@ -22,8 +22,6 @@ unset file
 
 . $HOME/.dotfiles/shell/z.sh
 
-export DISPLAY=$(cat /etc/resolv.conf | grep nameserver | awk '{print $2; exit;}'):0
-
 export EDITOR=code
 
 export PATH=/c/Windows/SysWOW64:$PATH
