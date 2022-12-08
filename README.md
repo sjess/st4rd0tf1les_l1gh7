@@ -1,5 +1,5 @@
 ![GitHub repo size](https://img.shields.io/github/languages/code-size/sjess/st4rd0tf1les_l1gh7?style=for-the-badge)
-![GitHub last commit](https://img.shields.io/github/last-commit/sjess/st4rd0tf1les?style=for-the-badge)
+![GitHub last commit](https://img.shields.io/github/last-commit/sjess/st4rd0tf1les_l1gh7?style=for-the-badge)
 
 #### st4rd0tf1les
 
