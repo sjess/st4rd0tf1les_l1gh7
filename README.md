@@ -87,7 +87,7 @@ Settings in Microsoft Terminal e.g.: `wsl.exe -d UbuntuDev -u sjess`
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [powerlevel10k](https://github.com/romkatv/powerlevel10k)
 
-Script installs ZSH, Composer, Node, NPM, PHP7.4, Python3 & PIP
+Script installs ZSH, Composer, Node, NPM, NVM, PHP, Python3 & PIP 3
 
 # Misc
 
