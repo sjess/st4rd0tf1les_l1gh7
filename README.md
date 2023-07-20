@@ -147,6 +147,13 @@ To use WSL with WT put the following into the profile settings (watch the DISTRO
   "startingDirectory": "//wsl$/{YOUR_DISTRO}/home/{USERNAME}"
 }
 ```
+# Expose WSL 2 to Network
+
+Open Port 8000 in Firewall
+
+```
+netsh interface portproxy add v4tov4 listenport=8000 listenaddress=**IP OF PC** connectport=8000 connectaddress=localhost
+```
 
 # Move WSL to another Drive
 
