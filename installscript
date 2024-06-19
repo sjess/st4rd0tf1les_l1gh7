@@ -58,11 +58,6 @@ then
     sudo apt update -y
     sudo apt install php php-cli php-json php-common php-mysql php-zip php-gd php-imagick php-mbstring php-curl php-xml php-xmlrpc php-pear php-bcmath php-imap php-zip php-intl -y
     echo " ${GREEN}++++++++++++++++++++++++++++++"
-    echo " ${RED}Installiere PHP 8.0"
-    echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
-    sudo apt install php8.0 -y
-    sudo apt install php8.0-cli php8.0-json php8.0-common php8.0-mysql php8.0-zip php8.0-gd php8.0-imagick php8.0-mbstring php8.0-curl php8.0-xml php8.0-xmlrpc php8.0-pear php8.0-bcmath php8.0-imap php8.0-zip php8.0-intl -y
-    echo " ${GREEN}++++++++++++++++++++++++++++++"
     echo " ${RED}Installiere PHP 7.4"
     echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
     sudo apt install php7.4 -y
@@ -156,7 +151,7 @@ echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere Composer"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
-php -r "if (hash_file('sha384', 'composer-setup.php') === 'e21205b207c3ff031906575712edab6f13eb0b361f2085f1f1237b7126d785e826a450292b6cfd1d64d92e6563bbde02') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
+php -r "if (hash_file('sha384', 'composer-setup.php') === 'dac665fdc30fdd8ec78b38b9800061b4150413ff2e3b6f88543c636f7cd84f6db9189d43a81e5503cda447da73c7e5b6') { echo 'Installer verified'; } else { echo 'Installer corrupt'; unlink('composer-setup.php'); } echo PHP_EOL;"
 php composer-setup.php
 php -r "unlink('composer-setup.php');"
 sudo mv composer.phar /usr/local/bin/composer
