@@ -22,8 +22,6 @@ apps=(
     libssl-dev
     ca-certificates
     ffmpeg
-    youtube-dl
-    neofetch
     htop
 )
 trap '' 2
