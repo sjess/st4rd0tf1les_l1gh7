@@ -52,3 +52,9 @@ git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git ~/.dotfiles
 cd ~/.dotfiles
 ./start
 ```
+
+## Microsoft Terminal
+
+Change commandline for example to `C:\Windows\System32\wsl.exe -d Ubuntu-24.04`
+
+and startdirectory to `\\wsl$\Ubuntu-24.04\home\{USERNAME}\repositories` according to your distribution after you made the directory with `mkd repositories`.
