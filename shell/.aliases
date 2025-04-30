@@ -31,7 +31,7 @@ alias deploy="./deploy.sh"
 
 # Rector
 alias r="./vendor/bin/rector"
-alias rdry="./vendor/bin/rector --dry run"
+alias rdry="./vendor/bin/rector --dry-run"
 
 #Linux
 alias update="sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y"
