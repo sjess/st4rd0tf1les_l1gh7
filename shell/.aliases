@@ -2,7 +2,7 @@ alias ga="git add"
 alias gaa="git add ."
 alias gc="git commit -am "
 alias gp="git push"
-alias gpl="git pull" 
+alias gpl="git pull"
 alias gs="git status"
 alias nah="git reset --hard; git clean -df;"
 alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
@@ -10,6 +10,7 @@ alias glog="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
 # Misc
 alias yw="yarn watch"
 alias gw="gulp watch"
+alias nrd="npm run dev"
 alias nrw="npm run watch"
 alias nrs="npm run serve"
 alias nrb="npm run build"
@@ -24,8 +25,13 @@ alias cu="composer update"
 alias cr="composer require"
 alias ci="composer install"
 alias cda="composer dump-autoload -o"
+alias crd="composer run dev"
 
 alias deploy="./deploy.sh"
+
+# Rector
+alias r="./vendor/bin/rector"
+alias rdry="./vendor/bin/rector --dry run"
 
 #Linux
 alias update="sudo apt update -y && sudo apt upgrade -y && sudo apt autoremove -y"
