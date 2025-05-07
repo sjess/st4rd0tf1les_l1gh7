@@ -45,16 +45,16 @@ and edit the following line in `sudoers` with `sudo nano /etc/sudoers` or `sudo 
 
 ## Installation
 
-You can install it by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script.
+You can install it by cloning the repository as `.dotfiles` in your home directory and running the bootstrap script. If you started your distribution and you are root, start with point 2 and follow instructions.
 
+### 1.
 ```batch
 git clone https://github.com/sjess/st4rd0tf1les_l1gh7.git ~/.dotfiles
 cd ~/.dotfiles
 ./start
 ```
 
-### If installation without user
-
+### 2.
 ```batch
 cd ~/.dotfiles
 ./setup_sudo_user.sh
