@@ -1,0 +1,24 @@
+{
+  "name": "wsl-dev-bootstrap",
+  "version": "1.0.0",
+  "description": "Ein CLI-Tool zur automatisierten Einrichtung einer vollständigen Entwicklungsumgebung unter WSL – inkl. PHP, Node.js, Composer, Laravel, ZSH, Fonts, Git & mehr.",
+  "bin": {
+    "wsl-setup": "index.js"
+  },
+  "main": "index.js",
+  "author": "Stephan Jess",
+  "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cfonts": "^3.3.0",
+    "chalk": "^4.1.2",
+    "clear-any-console": "^1.16.3",
+    "cli-check-node": "^1.3.4",
+    "cli-handle-unhandled": "^1.1.2",
+    "cli-progress": "^3.9.1",
+    "inquirer": "^8.2.0",
+    "ora": "^8.2.0"
+  }
+}
