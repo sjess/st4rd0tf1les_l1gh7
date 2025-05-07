@@ -53,6 +53,11 @@ cd ~/.dotfiles
 ./start
 ```
 
+### If installation without user
+
+cd ~/.dotfiles
+./setup_sudo_user.sh
+
 ## Microsoft Terminal
 
 Change commandline for example to `C:\Windows\System32\wsl.exe -d Ubuntu-24.04`

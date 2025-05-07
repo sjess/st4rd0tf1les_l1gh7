@@ -55,11 +55,6 @@ then
     echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
     sudo apt update -y
     sudo apt install php php-cli php-json php-common php-mysql php-zip php-gd php-imagick php-mbstring php-curl php-xml php-xmlrpc php-pear php-bcmath php-imap php-zip php-intl -y
-    echo " ${GREEN}++++++++++++++++++++++++++++++"
-    echo " ${RED}Installiere PHP 7.4"
-    echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
-    sudo apt install php7.4 -y
-	sudo apt install php7.4-fpm php7.4-mysql php7.4-zip php7.4-gd php7.4-imagick php7.4-mbstring php7.4-curl php7.4-xml php7.4-xmlrpc php7.4-bcmath php7.4-imap php7.4-intl -y
     sudo update-alternatives --config php
 fi
 
@@ -129,10 +124,6 @@ then
     ln -s ~/.dotfiles/shell/.wsl2 ~/.zshrc
 fi
 
-# Symlink warp prefs
-rm ~/.warprc
-ln -s ~/.dotfiles/shell/.warprc ~/.warprc
-
 #Copy WSL config
 sudo cp ~/.dotfiles/shell/wsl.conf /etc/wsl.conf
 
@@ -165,10 +156,12 @@ echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere Node, NPM & NVM"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
-curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
-sudo apt-get install -y nodejs
-curl https://raw.githubusercontent.com/creationix/nvm/master/install.sh | bash
-nodejs -v
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash && \
+export NVM_DIR="$HOME/.nvm" && \
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+nvm install node && \
+nvm alias default node
+node -v
 
 echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere globale NPM Packages"

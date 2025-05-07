@@ -87,7 +87,18 @@ dmysql() {
 }
 
 dapache() {
-   docker run --restart always --name novagraphix-apache --mount type=bind,source=/home/sjess/repositories/htdocs,target=/app -p 1337:80 -d webdevops/php-apache:7.3
+  local base_dir="$HOME/repositories"
+  local htdocs_dir="$base_dir/htdocs"
+
+  # Create directories if they don't exist
+  [ -d "$base_dir" ] || mkdir -p "$base_dir"
+  [ -d "$htdocs_dir" ] || mkdir -p "$htdocs_dir"
+
+  docker run --restart always \
+    --name novagraphix-apache \
+    --mount type=bind,source="$htdocs_dir",target=/app \
+    -p 1337:80 \
+    -d webdevops/php-apache:7.3
 }
 
 # Database Restore
