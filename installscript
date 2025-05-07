@@ -174,7 +174,7 @@ echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 sudo npm install -g ffmpeg-progressbar-cli
 
 echo " ${GREEN}++++++++++++++++++++++++++++++"
-echo " ${RED}SSH"
+echo " ${RED}GIT Konfiguration"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 printf "\n GIT konfigurieren (j/n): "
 read -r gitconfig
