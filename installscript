@@ -160,10 +160,10 @@ composer global require laravel/installer
 echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere Node, NPM & NVM"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
-sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash && \
 export NVM_DIR="$HOME/.nvm" && \
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
 nvm install node && \
 nvm alias default node
 node -v
