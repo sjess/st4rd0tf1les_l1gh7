@@ -43,7 +43,12 @@ then
     read -p 'Antwort: '  reply
     if [[ $reply =~ ^[Uu]$ ]]
     then
-        sudo add-apt-repository ppa:ondrej/php -y
+        printf "\n ppa:ondrey/php Repository installieren? (j/n) "
+        read -p 'Antwort: '  repo
+        if [[ $repo =~ ^[Jj]$ ]]
+        then
+            LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
+        fi
     fi
     if [[ $reply =~ ^[Dd]$ ]]
     then
@@ -167,6 +172,27 @@ echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}Installiere globale NPM Packages"
 echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
 sudo npm install -g ffmpeg-progressbar-cli
+
+echo " ${GREEN}++++++++++++++++++++++++++++++"
+echo " ${RED}SSH"
+echo " ${GREEN}++++++++++++++++++++++++++++++${WHITE}"
+printf "\n GIT konfigurieren (j/n): "
+read -r gitconfig
+if [ -z "${gitconfig}" ] || [ "${gitconfig}" == j ] || [ "${gitconfig}" == J ]; then
+    printf "\n Name (Default: Stephan Jess): "
+    read -r username
+    if [ -z "${username}" ]; then
+        username="Stephan Jess"
+    fi
+    git config --global user.name "${username}"
+
+    printf "\n E-Mail (Default: s.jess@novagraphix.de): "
+    read -r email
+    if [ -z "${email}" ]; then
+        email="s.jess@novagraphix.de"
+    fi
+    git config --global user.email "${email}"
+fi
 
 echo " ${GREEN}++++++++++++++++++++++++++++++"
 echo " ${RED}SSH"
