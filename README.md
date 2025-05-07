@@ -55,8 +55,10 @@ cd ~/.dotfiles
 
 ### If installation without user
 
+```batch
 cd ~/.dotfiles
 ./setup_sudo_user.sh
+```
 
 ## Microsoft Terminal
 
