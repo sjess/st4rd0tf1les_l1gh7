@@ -19,10 +19,13 @@ echo "Aktualisiere /etc/sudoers ..."
 sed -i 's/^%sudo\s\+ALL=(ALL:ALL)\s\+ALL/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
 
 # 4. Standardbenutzer in /etc/wsl.conf setzen
-cat <<EOF > /etc/wsl.conf
+if ! grep -q '^\[user\]' /etc/wsl.conf; then
+  cat <<EOF >> /etc/wsl.conf
+
 [user]
 default=$USERNAME
 EOF
+fi
 
 echo "Fertig! '$USERNAME' ist jetzt Standardbenutzer mit sudo ohne Passwort."
 echo "Starte WSL mit 'wsl --shutdown' neu, um die Änderungen zu aktivieren."
