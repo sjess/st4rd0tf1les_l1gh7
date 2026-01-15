@@ -228,3 +228,54 @@ $GREEN gdoc$NORMAL — 📖 DOC
 $GREEN gtst$NORMAL — 🧪️ TEST
 $GREEN gbrk$NORMAL — ‼️ BREAKING"
 }
+
+# Editor-Pfade
+CURSOR_BIN="/c/Users/post/AppData/Local/Programs/cursor/resources/app/codeBin/code"
+VSCODE_BIN="/c/Users/post/AppData/Local/Programs/Microsoft VS Code/bin/code"
+
+# Cursor/VS Code - Öffnet Dateien/Verzeichnisse im gewählten Editor
+# Standard: Cursor (kann über CODE_EDITOR Umgebungsvariable geändert werden)
+# Mögliche Werte: "cursor" oder "vscode"
+code() {
+    # Bestimme welcher Editor verwendet werden soll
+    local editor="${CODE_EDITOR:-cursor}"
+
+    # Wähle den entsprechenden Binärpfad
+    case "$editor" in
+        cursor|Cursor|CURSOR)
+            local editor_bin="$CURSOR_BIN"
+            ;;
+        vscode|VSCode|VSCODE|code)
+            local editor_bin="$VSCODE_BIN"
+            ;;
+        *)
+            echo "Unbekannter Editor: $editor. Verwende Cursor als Standard."
+            local editor_bin="$CURSOR_BIN"
+            ;;
+    esac
+
+    # Wenn kein Argument übergeben wurde, öffne das aktuelle Verzeichnis
+    if [ $# -eq 0 ]; then
+        "$editor_bin" .
+    else
+        # Andernfalls öffne die übergebenen Argumente
+        "$editor_bin" "$@"
+    fi
+}
+
+# Direkte Befehle für Cursor und VS Code
+cursor() {
+    if [ $# -eq 0 ]; then
+        "$CURSOR_BIN" .
+    else
+        "$CURSOR_BIN" "$@"
+    fi
+}
+
+vscode() {
+    if [ $# -eq 0 ]; then
+        "$VSCODE_BIN" .
+    else
+        "$VSCODE_BIN" "$@"
+    fi
+}
