@@ -102,7 +102,7 @@ async function installPackages(title, pkgs) {
         { type: 'confirm', name: 'ppa', message: 'PPA:ondrej/php hinzufügen?', when: a => a.php && a.distro === 'Ubuntu' },
         { type: 'confirm', name: 'zsh', message: 'Installiere oh-my-zsh?' },
         { type: 'confirm', name: 'npm', message: 'Globale NPM-Pakete installieren?' },
-        { type: 'confirm', name: 'opencode', message: 'opencode installieren?' },
+        { type: 'confirm', name: 'opencode', message: 'Opencode installieren?' },
         { type: 'confirm', name: 'git', message: 'GIT konfigurieren?' },
         { type: 'confirm', name: 'ssh', message: 'SSH-Key generieren?' }
     ]);
@@ -145,7 +145,15 @@ async function installPackages(title, pkgs) {
     // 4. Python3 & Pip3
     await installPackages('Python3 & Pip3', ['python3', 'python3-pip']);
 
-    // 5. Miscellaneous libraries
+    // 4b. MCP fetch server
+    console.log(chalk.blue(`\n[ START ] MCP fetch server installieren`));
+    t0 = Date.now();
+    runCommand('python3 -m venv ~/.venvs/mcp-fetch');
+    runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip');
+    runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch');
+    console.log(chalk.green(`[ DONE ] MCP fetch server in ${Math.round((Date.now() - t0) / 1000)}s`));
+
+    // 6. Miscellaneous libraries
     await installPackages('Misc Libraries', [
         'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-1-3', 'libexpat1',
         'libfontconfig1', 'libgcc1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
@@ -153,7 +161,7 @@ async function installPackages(title, pkgs) {
         'libatomic1', 'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
     ]);
 
-    // 6. Oh-My-Zsh & plugins
+    // 7. Oh-My-Zsh & plugins
     if (answers.zsh) {
         console.log(chalk.blue(`\n[ START ] ZSH installieren`));
         t0 = Date.now();
@@ -206,12 +214,12 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] ZSH installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 7. WSL config
+    // 8. WSL config
     if (fs.existsSync(path.join(process.env.HOME, '.dotfiles/shell/wsl.conf'))) {
         runCommand('sudo cp ~/.dotfiles/shell/wsl.conf /etc/wsl.conf', { ignoreOutput: true });
     }
 
-    // 8. Nerd Fonts installer
+    // 9. Nerd Fonts installer
     if (!fs.existsSync('getnf')) {
         runCommand(
             'git clone https://github.com/ronniedroid/getnf.git && cd getnf && ./install.sh',
@@ -219,29 +227,7 @@ async function installPackages(title, pkgs) {
         );
     }
 
-    // 9. Composer installation
-    console.log(chalk.blue(`\n[ START ] Composer installieren`));
-    t0 = Date.now();
-    runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
-    runCommand("sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
-    runCommand("rm composer-setup.php");
-    console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
-
-    // 10. Laravel installer
-    console.log(chalk.blue(`\n[ START ] Laravel Global Installer installieren`));
-    t0 = Date.now();
-    runCommand('composer global require laravel/installer', { ignoreOutput: true });
-    console.log(chalk.green(`[ DONE ] Laravel Installer in ${Math.round((Date.now() - t0) / 1000)}s`));
-
-    // 11. Global NPM
-    if (answers.npm) {
-        console.log(chalk.blue(`\n[ START ] Globale NPM Packages`));
-        t0 = Date.now();
-        runCommand('npm install -g ffmpeg-progressbar-cli', { ignoreOutput: true });
-        console.log(chalk.green(`[ DONE ] Globale NPM Packages in ${Math.round((Date.now() - t0) / 1000)}s`));
-    }
-
-    // 12. opencode installation
+    // 10. opencode installation
     if (answers.opencode) {
         console.log(chalk.blue(`\n[ START ] opencode installieren`));
         t0 = Date.now();
@@ -253,7 +239,41 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 13. Git configuration
+    // 11. Composer installation
+    console.log(chalk.blue(`\n[ START ] Composer installieren`));
+    t0 = Date.now();
+    runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
+    runCommand("sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
+    runCommand("rm composer-setup.php");
+    console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
+
+    // 12. Laravel installer
+    console.log(chalk.blue(`\n[ START ] Laravel Global Installer installieren`));
+    t0 = Date.now();
+    runCommand('composer global require laravel/installer', { ignoreOutput: true });
+    console.log(chalk.green(`[ DONE ] Laravel Installer in ${Math.round((Date.now() - t0) / 1000)}s`));
+
+    // 13. Global NPM
+    if (answers.npm) {
+        console.log(chalk.blue(`\n[ START ] Globale NPM Packages`));
+        t0 = Date.now();
+        runCommand('npm install -g ffmpeg-progressbar-cli', { ignoreOutput: true });
+        console.log(chalk.green(`[ DONE ] Globale NPM Packages in ${Math.round((Date.now() - t0) / 1000)}s`));
+    }
+
+    // 14. opencode installation
+    if (answers.opencode) {
+        console.log(chalk.blue(`\n[ START ] Opencode installieren`));
+        t0 = Date.now();
+        runCommand('curl -fsSL https://opencode.ai/install | bash');
+        const dotfilesOpencode = path.join(process.env.HOME, '.dotfiles/.opencode');
+        if (fs.existsSync(dotfilesOpencode)) {
+            runCommand(`cp -r ${dotfilesOpencode}/* ${process.env.HOME}/.opencode/`);
+        }
+        console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
+    }
+
+    // 15. Git configuration
     if (answers.git) {
         console.log(chalk.blue(`\n[ START ] GIT konfigurieren`));
         t0 = Date.now();
@@ -266,7 +286,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] GIT konfigurieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 14. SSH key generation
+    // 16. SSH key generation
     if (answers.ssh) {
         console.log(chalk.blue(`\n[ START ] SSH-Key generieren`));
         t0 = Date.now();
@@ -274,7 +294,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] SSH-Key generiert in ~/.ssh in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 15. Cleanup
+    // 17. Cleanup
     console.log(chalk.blue('[ START ] Säubern'));
     t0 = Date.now();
     runCommand('sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y', { ignoreOutput: true });
