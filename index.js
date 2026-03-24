@@ -128,10 +128,10 @@ async function installPackages(title, pkgs) {
     // 3. PHP installation
     if (answers.php) {
         if (answers.distro === 'Ubuntu' && answers.ppa) {
-            runCommand('sudo add-apt-repository ppa:ondrej/php -y');
+            runCommand('sudo add-apt-repository ppa:ondrej/php -y', { ignoreOutput: true });
         } else if (answers.distro === 'Debian') {
             runCommand(
-                "echo 'deb https://packages.sury.org/php/ $(lsb_release -sc) main' | sudo tee /etc/apt/sources.list.d/php.list"
+                "echo 'deb https://packages.sury.org/php/ $(lsb_release -sc) main' | sudo tee /etc/apt/sources.list.d/php.list", { ignoreOutput: true }
             );
             runCommand(
                 'wget -qO - https://packages.sury.org/php/apt.gpg | sudo apt-key add -',
@@ -149,9 +149,9 @@ async function installPackages(title, pkgs) {
     await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3.12-venv']);
 
     // 4b. MCP fetch server
-    runCommand('python3 -m venv ~/.venvs/mcp-fetch');
-    runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip');
-    runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch');
+    runCommand('python3 -m venv ~/.venvs/mcp-fetch', { ignoreOutput: true });
+    runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip', { ignoreOutput: true });
+    runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch', { ignoreOutput: true });
 
     // 5. Miscellaneous libraries
     await installPackages('Misc Libraries', [
