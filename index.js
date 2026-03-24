@@ -137,7 +137,7 @@ async function installPackages(title, pkgs) {
 
         await installPackages('PHP 8 & Extensions', [
             'php', 'php-cli', 'php-json', 'php-common', 'php-mysql', 'php-zip', 'php-gd', 'php-imagick',
-            'php-mbstring', 'php-curl', 'php-xml', 'php-xmlrpc', 'php-pear', 'php-bcmath', 'php-intl'
+            'php-mbstring', 'php-curl', 'php-xml', 'php-xmlrpc', 'php-pear', 'php-bcmath', 'php-imap', 'php-intl'
         ]);
     }
 
@@ -146,8 +146,8 @@ async function installPackages(title, pkgs) {
 
     // 5. Miscellaneous libraries
     await installPackages('Misc Libraries', [
-        'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-3', 'libexpat1',
-        'libfontconfig1', 'libgcc-s1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
+        'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-1-3', 'libexpat1',
+        'libfontconfig1', 'libgcc1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
         'libpango-1.0-0', 'libstdc++6', 'libx11-6', 'libxext6', 'libxrender1', 'libxss1', 'libxtst6',
         'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
     ]);
