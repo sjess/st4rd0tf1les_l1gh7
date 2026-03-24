@@ -1,0 +1,23 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "theme": "tokyonight",
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/home/sjess/repositories"]
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp"
+    },
+    "fetch": {
+      "type": "local",
+      "command": ["/home/sjess/.venvs/mcp-fetch/bin/python", "-m", "mcp_server_fetch"]
+    },
+    "git": {
+      "type": "local",
+      "command": ["npx", "@cyanheads/git-mcp-server@latest"]
+    }
+  }
+}
