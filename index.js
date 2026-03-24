@@ -149,7 +149,7 @@ async function installPackages(title, pkgs) {
         'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-1-3', 'libexpat1',
         'libfontconfig1', 'libgcc1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
         'libpango-1.0-0', 'libstdc++6', 'libx11-6', 'libxext6', 'libxrender1', 'libxss1', 'libxtst6',
-        'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
+        'libatomic1', 'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
     ]);
 
     // 6. Oh-My-Zsh & plugins
