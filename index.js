@@ -222,7 +222,7 @@ async function installPackages(title, pkgs) {
     console.log(chalk.blue(`\n[ START ] Composer installieren`));
     t0 = Date.now();
     runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
-    runCommand("php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
+    runCommand("sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
     runCommand("rm composer-setup.php");
     console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
 
