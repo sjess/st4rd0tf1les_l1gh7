@@ -19,7 +19,7 @@ node -v
 npm -v
 
 # Install opencode (only if not already installed)
-if ! command -v opencode &> /dev/null; then
+if [ ! -f "$HOME/.opencode/opencode" ] && [ ! -f "/usr/local/bin/opencode" ]; then
     curl -fsSL https://opencode.ai/install | bash
 
     # Copy opencode config from dotfiles
