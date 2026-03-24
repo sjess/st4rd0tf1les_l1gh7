@@ -116,6 +116,8 @@ async function installPackages(title, pkgs) {
     );
     console.log(chalk.green(`[ DONE ] System aktualisieren ... ${Math.round((Date.now() - t0) / 1000)}s`));
 
+    runCommand('mkdir -p ~/repositories', { ignoreOutput: true });
+
     // 2. Install common requirements
     await installPackages('Common Requirements', [
         'software-properties-common', 'build-essential', 'apt-transport-https', 'git', 'curl',
@@ -145,13 +147,9 @@ async function installPackages(title, pkgs) {
     // 4. Python3 & Pip3
     await installPackages('Python3 & Pip3', ['python3', 'python3-pip']);
 
-    // 4b. MCP fetch server
-    console.log(chalk.blue(`\n[ START ] MCP fetch server installieren`));
-    t0 = Date.now();
     runCommand('python3 -m venv ~/.venvs/mcp-fetch');
     runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip');
     runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch');
-    console.log(chalk.green(`[ DONE ] MCP fetch server in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 6. Miscellaneous libraries
     await installPackages('Misc Libraries', [
