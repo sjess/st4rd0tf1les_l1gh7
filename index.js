@@ -145,7 +145,7 @@ async function installPackages(title, pkgs) {
     }
 
     // 4. Python3 & Pip3
-    await installPackages('Python3 & Pip3', ['python3', 'python3-pip']);
+    await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3.12-venv']);
 
     runCommand('python3 -m venv ~/.venvs/mcp-fetch');
     runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip');
