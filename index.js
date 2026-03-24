@@ -221,7 +221,7 @@ async function installPackages(title, pkgs) {
     // 9. Composer installation
     console.log(chalk.blue(`\n[ START ] Composer installieren`));
     t0 = Date.now();
-    runCommand('curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer', { ignoreOutput: true });
+    runCommand('bash -c "curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer"', { ignoreOutput: true });
     console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 10. Laravel installer
