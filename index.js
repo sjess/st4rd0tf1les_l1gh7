@@ -137,7 +137,7 @@ async function installPackages(title, pkgs) {
 
         await installPackages('PHP 8 & Extensions', [
             'php', 'php-cli', 'php-json', 'php-common', 'php-mysql', 'php-zip', 'php-gd', 'php-imagick',
-            'php-mbstring', 'php-curl', 'php-xml', 'php-xmlrpc', 'php-pear', 'php-bcmath', 'php-imap', 'php-intl'
+            'php-mbstring', 'php-curl', 'php-xml', 'php-xmlrpc', 'php-pear', 'php-bcmath', 'php-intl'
         ]);
     }
 
