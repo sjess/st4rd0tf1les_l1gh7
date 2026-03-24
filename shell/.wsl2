@@ -29,4 +29,6 @@ export EDITOR=code
 export PATH=/c/Windows/SysWOW64:$PATH
 
 export PATH=$HOME/.config/composer/vendor/bin:$PATH
-export PATH=$HOME/.local/kitty.app/bin:$PATH
+
+# opencode
+export PATH=/home/sjess/.opencode/bin:$PATH
