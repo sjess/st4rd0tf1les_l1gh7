@@ -18,15 +18,5 @@ nvm alias default node
 node -v
 npm -v
 
-# Install opencode (only if not already installed)
-if [ ! -f "$HOME/.opencode/opencode" ] && [ ! -f "/usr/local/bin/opencode" ]; then
-    curl -fsSL https://opencode.ai/install | bash
-
-    # Copy opencode config from dotfiles
-    if [ -d "$HOME/.dotfiles/.opencode" ]; then
-        cp -r "$HOME/.dotfiles/.opencode"/* "$HOME/.opencode/"
-    fi
-fi
-
 npm install
 exec node index.js

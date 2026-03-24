@@ -103,7 +103,8 @@ async function installPackages(title, pkgs) {
         { type: 'confirm', name: 'zsh', message: 'Installiere oh-my-zsh?' },
         { type: 'confirm', name: 'npm', message: 'Globale NPM-Pakete installieren?' },
         { type: 'confirm', name: 'git', message: 'GIT konfigurieren?' },
-        { type: 'confirm', name: 'ssh', message: 'SSH-Key generieren?' }
+        { type: 'confirm', name: 'ssh', message: 'SSH-Key generieren?' },
+        { type: 'confirm', name: 'opencode', message: 'opencode installieren?' }
     ]);
 
     // 1. System update & upgrade
@@ -218,7 +219,19 @@ async function installPackages(title, pkgs) {
         );
     }
 
-    // 9. Composer installation
+    // 9. opencode installation
+    if (answers.opencode) {
+        console.log(chalk.blue(`\n[ START ] opencode installieren`));
+        t0 = Date.now();
+        runCommand('curl -fsSL https://opencode.ai/install | bash');
+        const dotfilesOpencode = path.join(process.env.HOME, '.dotfiles/.opencode');
+        if (fs.existsSync(dotfilesOpencode)) {
+            runCommand(`cp -r ${dotfilesOpencode}/* ${process.env.HOME}/.opencode/`);
+        }
+        console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
+    }
+
+    // 10. Composer installation
     console.log(chalk.blue(`\n[ START ] Composer installieren`));
     t0 = Date.now();
     runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
@@ -226,13 +239,13 @@ async function installPackages(title, pkgs) {
     runCommand("rm composer-setup.php");
     console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
 
-    // 10. Laravel installer
+    // 11. Laravel installer
     console.log(chalk.blue(`\n[ START ] Laravel Global Installer installieren`));
     t0 = Date.now();
     runCommand('composer global require laravel/installer', { ignoreOutput: true });
     console.log(chalk.green(`[ DONE ] Laravel Installer in ${Math.round((Date.now() - t0) / 1000)}s`));
 
-    // 11. Global NPM
+    // 12. Global NPM
     if (answers.npm) {
         console.log(chalk.blue(`\n[ START ] Globale NPM Packages`));
         t0 = Date.now();
@@ -240,7 +253,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] Globale NPM Packages in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 12. Git configuration
+    // 13. Git configuration
     if (answers.git) {
         console.log(chalk.blue(`\n[ START ] GIT konfigurieren`));
         t0 = Date.now();
@@ -253,7 +266,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] GIT konfigurieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 13. SSH key generation
+    // 14. SSH key generation
     if (answers.ssh) {
         console.log(chalk.blue(`\n[ START ] SSH-Key generieren`));
         t0 = Date.now();
@@ -261,7 +274,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] SSH-Key generiert in ~/.ssh in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 14. Cleanup
+    // 15. Cleanup
     console.log(chalk.blue('[ START ] Säubern'));
     t0 = Date.now();
     runCommand('sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y', { ignoreOutput: true });
