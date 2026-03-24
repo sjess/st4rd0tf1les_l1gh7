@@ -116,6 +116,7 @@ async function installPackages(title, pkgs) {
     );
     console.log(chalk.green(`[ DONE ] System aktualisieren ... ${Math.round((Date.now() - t0) / 1000)}s`));
 
+    // 1b. Create repositories directory
     runCommand('mkdir -p ~/repositories', { ignoreOutput: true });
 
     // 2. Install common requirements
@@ -147,11 +148,12 @@ async function installPackages(title, pkgs) {
     // 4. Python3 & Pip3
     await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3.12-venv']);
 
+    // 4b. MCP fetch server
     runCommand('python3 -m venv ~/.venvs/mcp-fetch');
     runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip');
     runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch');
 
-    // 6. Miscellaneous libraries
+    // 5. Miscellaneous libraries
     await installPackages('Misc Libraries', [
         'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-1-3', 'libexpat1',
         'libfontconfig1', 'libgcc1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
@@ -259,19 +261,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] Globale NPM Packages in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 14. opencode installation
-    if (answers.opencode) {
-        console.log(chalk.blue(`\n[ START ] Opencode installieren`));
-        t0 = Date.now();
-        runCommand('curl -fsSL https://opencode.ai/install | bash');
-        const dotfilesOpencode = path.join(process.env.HOME, '.dotfiles/.opencode');
-        if (fs.existsSync(dotfilesOpencode)) {
-            runCommand(`cp -r ${dotfilesOpencode}/* ${process.env.HOME}/.opencode/`);
-        }
-        console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
-    }
-
-    // 15. Git configuration
+    // 14. Git configuration
     if (answers.git) {
         console.log(chalk.blue(`\n[ START ] GIT konfigurieren`));
         t0 = Date.now();
@@ -284,7 +274,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] GIT konfigurieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 16. SSH key generation
+    // 15. SSH key generation
     if (answers.ssh) {
         console.log(chalk.blue(`\n[ START ] SSH-Key generieren`));
         t0 = Date.now();
@@ -292,7 +282,7 @@ async function installPackages(title, pkgs) {
         console.log(chalk.green(`[ DONE ] SSH-Key generiert in ~/.ssh in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 17. Cleanup
+    // 16. Cleanup
     console.log(chalk.blue('[ START ] Säubern'));
     t0 = Date.now();
     runCommand('sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y', { ignoreOutput: true });
