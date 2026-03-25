@@ -50,6 +50,26 @@ function runCommand(cmd, opts = {}) {
     execSync(cmd, { stdio, ...opts });
 }
 
+function getUbuntuCodename() {
+    if (fs.existsSync('/etc/os-release')) {
+        const osRelease = fs.readFileSync('/etc/os-release', 'utf8');
+        const match = osRelease.match(/^VERSION_CODENAME=(.+)$/m);
+        if (match) {
+            return match[1].replace(/^"|"$/g, '').trim();
+        }
+    }
+
+    try {
+        return execSync('lsb_release -sc', { encoding: 'utf8' }).trim();
+    } catch {
+        return '';
+    }
+}
+
+function isOndrejSupportedUbuntuCodename(codename) {
+    return ['bionic', 'focal', 'jammy', 'noble', 'oracular', 'plucky'].includes(codename);
+}
+
 /**
  * Installs an array of packages displaying a progress bar.
  */
@@ -128,15 +148,15 @@ async function installPackages(title, pkgs) {
     // 3. PHP installation
     if (answers.php) {
         if (answers.distro === 'Ubuntu' && answers.ppa) {
-            runCommand('sudo add-apt-repository ppa:ondrej/php -y', { ignoreOutput: true });
-        } else if (answers.distro === 'Debian') {
-            runCommand(
-                "echo 'deb https://packages.sury.org/php/ $(lsb_release -sc) main' | sudo tee /etc/apt/sources.list.d/php.list", { ignoreOutput: true }
-            );
-            runCommand(
-                'wget -qO - https://packages.sury.org/php/apt.gpg | sudo apt-key add -',
-                { ignoreOutput: true }
-            );
+            const ubuntuCodename = getUbuntuCodename();
+
+            if (isOndrejSupportedUbuntuCodename(ubuntuCodename)) {
+                runCommand('sudo add-apt-repository ppa:ondrej/php -y', { ignoreOutput: true });
+            } else {
+                console.log(chalk.yellow(`\n[ SKIP ] ppa:ondrej/php wird fuer Ubuntu '${ubuntuCodename || 'unknown'}' nicht aktiviert.`));
+                console.log(chalk.yellow('[ INFO ] Verwende stattdessen die offiziellen Ubuntu-Pakete fuer PHP.'));
+                removeOndrejPhpRepo();
+            }
         }
 
         await installPackages('PHP 8 & Extensions', [
@@ -146,7 +166,7 @@ async function installPackages(title, pkgs) {
     }
 
     // 4. Python3 & Pip3
-    await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3.12-venv']);
+    await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3-venv']);
 
     // 4b. MCP fetch server
     runCommand('python3 -m venv ~/.venvs/mcp-fetch', { ignoreOutput: true });
@@ -156,7 +176,7 @@ async function installPackages(title, pkgs) {
     // 5. Miscellaneous libraries
     await installPackages('Misc Libraries', [
         'libatk1.0-0', 'libatk-bridge2.0-0', 'libcairo2', 'libcups2', 'libdbus-1-3', 'libexpat1',
-        'libfontconfig1', 'libgcc1', 'libgdk-pixbuf2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
+        'libfontconfig1', 'libgcc1', 'libgdk-pixbuf-2.0-0', 'libglib2.0-0', 'libgtk-3-0', 'libnspr4',
         'libpango-1.0-0', 'libstdc++6', 'libx11-6', 'libxext6', 'libxrender1', 'libxss1', 'libxtst6',
         'libatomic1', 'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
     ]);
