@@ -228,3 +228,91 @@ $GREEN gdoc$NORMAL — 📖 DOC
 $GREEN gtst$NORMAL — 🧪️ TEST
 $GREEN gbrk$NORMAL — ‼️ BREAKING"
 }
+
+export OPENCODE_PIDFILE="${HOME}/.opencode.pid"
+
+_opencode_list_processes() {
+  ps -eo pid,ppid,pgid,%cpu,%mem,etime,args --sort=-%cpu \
+    | grep -Ei 'opencode|playwright|@playwright/mcp|modelcontextprotocol|chromium|chrome' \
+    | grep -v grep
+}
+
+_opencode_kill_group() {
+  local pid="$1"
+  [ -z "$pid" ] && return 0
+  kill -0 "$pid" 2>/dev/null || return 0
+
+  local pgid
+  pgid="$(ps -o pgid= -p "$pid" 2>/dev/null | tr -d ' ')"
+
+  if [ -n "$pgid" ]; then
+    kill -TERM -- "-$pgid" 2>/dev/null || true
+    sleep 2
+    kill -KILL -- "-$pgid" 2>/dev/null || true
+  fi
+}
+
+_opencode_cleanup_orphans() {
+  pkill -TERM -f '(^|/)(opencode)( |$)' 2>/dev/null || true
+  pkill -TERM -f '@playwright/mcp' 2>/dev/null || true
+  pkill -TERM -f 'node.*playwright' 2>/dev/null || true
+  pkill -TERM -f 'node.*modelcontextprotocol' 2>/dev/null || true
+  pkill -TERM -f 'chromium.*playwright' 2>/dev/null || true
+  pkill -TERM -f 'chrome.*playwright' 2>/dev/null || true
+
+  sleep 2
+
+  pkill -KILL -f '(^|/)(opencode)( |$)' 2>/dev/null || true
+  pkill -KILL -f '@playwright/mcp' 2>/dev/null || true
+  pkill -KILL -f 'node.*playwright' 2>/dev/null || true
+  pkill -KILL -f 'node.*modelcontextprotocol' 2>/dev/null || true
+  pkill -KILL -f 'chromium.*playwright' 2>/dev/null || true
+  pkill -KILL -f 'chrome.*playwright' 2>/dev/null || true
+}
+
+opencode-status() {
+  echo "=== OpenCode status ==="
+  if [ -f "$OPENCODE_PIDFILE" ]; then
+    local pid
+    pid="$(cat "$OPENCODE_PIDFILE" 2>/dev/null)"
+    echo "PID file: $OPENCODE_PIDFILE"
+    echo "Recorded PID: ${pid:-<empty>}"
+    if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+      echo "Recorded main process is running."
+    else
+      echo "Recorded main process is not running."
+    fi
+  else
+    echo "No PID file present."
+  fi
+
+  echo
+  echo "=== Matching processes ==="
+  _opencode_list_processes || true
+}
+
+opencode-close() {
+  echo "[opencode-close] Stopping OpenCode and related processes..."
+
+  if [ -f "$OPENCODE_PIDFILE" ]; then
+    local pid
+    pid="$(cat "$OPENCODE_PIDFILE" 2>/dev/null)"
+    [ -n "$pid" ] && _opencode_kill_group "$pid"
+    rm -f "$OPENCODE_PIDFILE"
+  fi
+
+  _opencode_cleanup_orphans
+
+  echo
+  echo "[opencode-close] Remaining matching processes:"
+  _opencode_list_processes || true
+}
+
+opencode-run() {
+  echo "[opencode-run] Cleaning stale processes..."
+  _opencode_cleanup_orphans
+
+  trap 'echo; echo "[opencode-run] Cleanup..."; _opencode_cleanup_orphans' EXIT INT TERM
+
+  opencode "$@"
+}
