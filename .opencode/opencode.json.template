@@ -5,7 +5,7 @@
   "mcp": {
     "filesystem": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "/home/sjess/repositories"]
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "__HOME__/repositories"]
     },
     "context7": {
       "type": "remote",
@@ -13,7 +13,7 @@
     },
     "fetch": {
       "type": "local",
-      "command": ["/home/sjess/.venvs/mcp-fetch/bin/python", "-m", "mcp_server_fetch"]
+      "command": ["__HOME__/.venvs/mcp-fetch/bin/python", "-m", "mcp_server_fetch"]
     },
     "git": {
       "type": "local",

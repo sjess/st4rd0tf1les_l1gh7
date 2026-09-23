@@ -4,7 +4,6 @@
 // Core Dependencies
 const chalk = require('chalk');
 const dim = chalk.dim;
-const inquirer = require('inquirer').default;
 const cliProgress = require('cli-progress');
 const { execSync } = require('child_process');
 const fs = require('fs');
@@ -16,6 +15,16 @@ const unhandled = require('cli-handle-unhandled');
 const pkgJSON = require('./package.json');
 const clearConsole = require('clear-any-console');
 const CFonts = require('cfonts');
+
+// inquirer v9 is ESM-only; require() of ESM needs Node >= 20.19
+const MIN_NODE_VERSION = '>=20.19.0';
+
+// sudo resets the environment, so the frontend must be passed inline
+const APT = 'sudo DEBIAN_FRONTEND=noninteractive apt-get';
+const APT_KEEP_CONFIGS = '-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold';
+
+const APT_SOURCES_DIR = '/etc/apt/sources.list.d';
+const APT_SOURCES_BACKUP_DIR = '/var/backups/wsl-dev-bootstrap';
 
 /**
  * Displays a styled welcome banner.
@@ -70,12 +79,62 @@ function isOndrejSupportedUbuntuCodename(codename) {
     return ['bionic', 'focal', 'jammy', 'noble', 'oracular', 'plucky'].includes(codename);
 }
 
+function isUbuntu() {
+    if (!fs.existsSync('/etc/os-release')) {
+        return false;
+    }
+    return /^ID=("?)ubuntu\1$/m.test(fs.readFileSync('/etc/os-release', 'utf8'));
+}
+
+/**
+ * Disables leftover ppa:ondrej/php source files. After a release upgrade they
+ * point to a codename without a Release file, which makes every
+ * `apt-get update` fail. Files are moved to a backup dir instead of deleted.
+ */
+function removeOndrejPhpRepo() {
+    if (!fs.existsSync(APT_SOURCES_DIR)) {
+        return;
+    }
+
+    const stale = fs.readdirSync(APT_SOURCES_DIR)
+        .filter(f => /^ondrej-ubuntu-php-.*\.(list|sources)$/.test(f));
+
+    if (stale.length === 0) {
+        return;
+    }
+
+    runCommand(`sudo mkdir -p ${APT_SOURCES_BACKUP_DIR}`);
+    for (const file of stale) {
+        runCommand(`sudo mv "${path.join(APT_SOURCES_DIR, file)}" "${APT_SOURCES_BACKUP_DIR}/"`);
+        console.log(chalk.yellow(`[ WARN ] ${file} deaktiviert (Backup: ${APT_SOURCES_BACKUP_DIR})`));
+    }
+}
+
+/**
+ * Renders a config template (__HOME__ -> $HOME). Only writes when the target is
+ * missing, because the tool may have changed its own config since.
+ */
+function installTemplate(src, dest) {
+    if (!fs.existsSync(src)) {
+        return;
+    }
+    const rendered = fs.readFileSync(src, 'utf8').replaceAll('__HOME__', process.env.HOME);
+
+    if (!fs.existsSync(dest)) {
+        fs.mkdirSync(path.dirname(dest), { recursive: true });
+        fs.writeFileSync(dest, rendered);
+        console.log(chalk.green(`[ OK ] ${dest} geschrieben`));
+    } else if (fs.readFileSync(dest, 'utf8') !== rendered) {
+        console.log(chalk.yellow(`[ WARN ] ${dest} weicht von ${path.basename(src)} ab; behalten`));
+    }
+}
+
 /**
  * Installs an array of packages displaying a progress bar.
  */
 async function installPackages(title, pkgs) {
     console.log(chalk.blue(`\n[ START ] ${title}`));
-    runCommand('sudo apt-get update -y', { ignoreOutput: true });
+    runCommand(`${APT} update -y`, { ignoreOutput: true });
 
     const bar = new cliProgress.SingleBar(
         { format: `${chalk.green(title)} |{bar}| {value}/{total}`, hideCursor: true }
@@ -85,7 +144,7 @@ async function installPackages(title, pkgs) {
     const start = Date.now();
 
     for (const pkg of pkgs) {
-        runCommand(`sudo apt-get install -y ${pkg}`, { ignoreOutput: true });
+        runCommand(`${APT} install -y ${pkg}`, { ignoreOutput: true });
         bar.increment();
     }
 
@@ -113,7 +172,8 @@ async function installPackages(title, pkgs) {
         color: '#000000',
         bold: true
     });
-    checkNode('>=10.0.0');
+    checkNode(MIN_NODE_VERSION);
+    const inquirer = require('inquirer').default;
 
     // 0c. Prompt all user options at once
     const answers = await inquirer.prompt([
@@ -127,11 +187,18 @@ async function installPackages(title, pkgs) {
         { type: 'confirm', name: 'ssh', message: 'SSH-Key generieren?' }
     ]);
 
+    // 0d. Stale PPA entries would break the first apt-get update below
+    const ubuntuCodename = isUbuntu() ? getUbuntuCodename() : '';
+    const ondrejSupported = isOndrejSupportedUbuntuCodename(ubuntuCodename);
+    if (ubuntuCodename && !ondrejSupported) {
+        removeOndrejPhpRepo();
+    }
+
     // 1. System update & upgrade
     console.log(chalk.blue(`\n[ START ] System aktualisieren & upgraden`));
     let t0 = Date.now();
     runCommand(
-        'sudo apt-get update -y && sudo apt-get upgrade -y && sudo apt-get dist-upgrade -y',
+        `${APT} update -y && ${APT} upgrade -y ${APT_KEEP_CONFIGS} && ${APT} dist-upgrade -y ${APT_KEEP_CONFIGS}`,
         { ignoreOutput: true }
     );
     console.log(chalk.green(`[ DONE ] System aktualisieren ... ${Math.round((Date.now() - t0) / 1000)}s`));
@@ -142,20 +209,17 @@ async function installPackages(title, pkgs) {
     // 2. Install common requirements
     await installPackages('Common Requirements', [
         'software-properties-common', 'build-essential', 'apt-transport-https', 'git', 'curl',
-        'unzip', 'libssl-dev', 'ca-certificates', 'ffmpeg', 'htop'
+        'unzip', 'libssl-dev', 'ca-certificates', 'ffmpeg', 'htop', 'rsync'
     ]);
 
     // 3. PHP installation
     if (answers.php) {
         if (answers.distro === 'Ubuntu' && answers.ppa) {
-            const ubuntuCodename = getUbuntuCodename();
-
-            if (isOndrejSupportedUbuntuCodename(ubuntuCodename)) {
+            if (ondrejSupported) {
                 runCommand('sudo add-apt-repository ppa:ondrej/php -y', { ignoreOutput: true });
             } else {
                 console.log(chalk.yellow(`\n[ SKIP ] ppa:ondrej/php wird fuer Ubuntu '${ubuntuCodename || 'unknown'}' nicht aktiviert.`));
                 console.log(chalk.yellow('[ INFO ] Verwende stattdessen die offiziellen Ubuntu-Pakete fuer PHP.'));
-                removeOndrejPhpRepo();
             }
         }
 
@@ -186,11 +250,13 @@ async function installPackages(title, pkgs) {
         console.log(chalk.blue(`\n[ START ] ZSH installieren`));
         t0 = Date.now();
 
-        runCommand('sudo apt-get install -y zsh', { ignoreOutput: true });
-        runCommand('sudo chsh -s /usr/bin/zsh', { ignoreOutput: true });
+        runCommand(`${APT} install -y zsh`, { ignoreOutput: true });
+        // Without a username, chsh would change root's shell
+        runCommand('sudo chsh -s "$(command -v zsh)" "$USER"', { ignoreOutput: true });
         runCommand('rm -rf ~/.oh-my-zsh', { ignoreOutput: true });
+        // Unattended: otherwise the installer ends with `exec zsh` and blocks this process
         runCommand(
-            'curl -L https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh | sh',
+            'curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | RUNZSH=no CHSH=no sh -s -- --unattended',
             { ignoreOutput: true }
         );
 
@@ -201,7 +267,7 @@ async function installPackages(title, pkgs) {
         );
 
         console.log(chalk.yellow('[ Additional ] Powerline-Symbols installieren'));
-        runCommand('sudo apt-get install -y fontconfig', { ignoreOutput: true });
+        runCommand(`${APT} install -y fontconfig`, { ignoreOutput: true });
         runCommand(
             'wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf',
             { ignoreOutput: true }
@@ -252,26 +318,42 @@ async function installPackages(title, pkgs) {
         console.log(chalk.blue(`\n[ START ] opencode installieren`));
         t0 = Date.now();
         runCommand('curl -fsSL https://opencode.ai/install | bash');
-        const dotfilesOpencode = path.join(process.env.HOME, '.dotfiles/.opencode');
+        const dotfilesOpencode = path.join(__dirname, '.opencode');
         if (fs.existsSync(dotfilesOpencode)) {
-            runCommand(`cp -r ${dotfilesOpencode}/* ${process.env.HOME}/.opencode/`);
+            // "dir/." instead of "dir/*" so dot entries like skills/.system are included;
+            // replaced files are backed up, local-only files are kept
+            const backupDir = path.join(process.env.HOME, '.local/state/wsl-dev-bootstrap/backups/opencode');
+            runCommand(`rsync -a --backup --backup-dir="${backupDir}" --exclude '*.template' "${dotfilesOpencode}/." "${process.env.HOME}/.opencode/"`);
+            installTemplate(
+                path.join(dotfilesOpencode, 'opencode.json.template'),
+                path.join(process.env.HOME, '.opencode/opencode.json')
+            );
         }
         console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
-    // 11. Composer installation
-    console.log(chalk.blue(`\n[ START ] Composer installieren`));
+    // 10b. Claude Code & Codex with the config exported to ai/ (always installed)
+    console.log(chalk.blue(`\n[ START ] Claude Code & Codex installieren`));
     t0 = Date.now();
-    runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
-    runCommand("sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
-    runCommand("rm composer-setup.php");
-    console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
+    runCommand(`bash "${path.join(__dirname, 'scripts/install_ai_tools.sh')}"`);
+    console.log(chalk.green(`[ DONE ] Claude Code & Codex in ${Math.round((Date.now() - t0) / 1000)}s`));
 
-    // 12. Laravel installer
-    console.log(chalk.blue(`\n[ START ] Laravel Global Installer installieren`));
-    t0 = Date.now();
-    runCommand('composer global require laravel/installer', { ignoreOutput: true });
-    console.log(chalk.green(`[ DONE ] Laravel Installer in ${Math.round((Date.now() - t0) / 1000)}s`));
+    // 11. + 12. Composer & Laravel installer require PHP
+    if (answers.php) {
+        console.log(chalk.blue(`\n[ START ] Composer installieren`));
+        t0 = Date.now();
+        runCommand("curl -sS https://getcomposer.org/installer -o composer-setup.php");
+        runCommand("sudo php composer-setup.php --install-dir=/usr/local/bin --filename=composer");
+        runCommand("rm composer-setup.php");
+        console.log(chalk.green(`[ DONE ] Composer installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
+
+        console.log(chalk.blue(`\n[ START ] Laravel Global Installer installieren`));
+        t0 = Date.now();
+        runCommand('composer global require laravel/installer', { ignoreOutput: true });
+        console.log(chalk.green(`[ DONE ] Laravel Installer in ${Math.round((Date.now() - t0) / 1000)}s`));
+    } else {
+        console.log(chalk.yellow('\n[ SKIP ] Composer & Laravel Installer (PHP nicht gewaehlt)'));
+    }
 
     // 13. Global NPM
     if (answers.npm) {
@@ -298,14 +380,15 @@ async function installPackages(title, pkgs) {
     if (answers.ssh) {
         console.log(chalk.blue(`\n[ START ] SSH-Key generieren`));
         t0 = Date.now();
-        runCommand('ssh-keygen -t rsa -b 4096 -C "$USER@$HOSTNAME"', { ignoreOutput: true });
+        // Output stays visible: ssh-keygen prompts for path and passphrase
+        runCommand('ssh-keygen -t rsa -b 4096 -C "$USER@$HOSTNAME"');
         console.log(chalk.green(`[ DONE ] SSH-Key generiert in ~/.ssh in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
 
     // 16. Cleanup
     console.log(chalk.blue('[ START ] Säubern'));
     t0 = Date.now();
-    runCommand('sudo apt-get autoremove -y && sudo apt-get autoclean -y && sudo apt-get clean -y', { ignoreOutput: true });
+    runCommand(`${APT} autoremove -y && ${APT} autoclean -y && ${APT} clean -y`, { ignoreOutput: true });
     console.log(chalk.green(`[ DONE ] Säubern in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // Final message
@@ -319,11 +402,10 @@ done
 unset file
 EOF`);
 
-    // Change shell or source bashrc
+    // A child process cannot change or reload the calling shell, so tell the user
     if (answers.zsh) {
-        runCommand('chsh -s $(which zsh)');
-        runCommand('zsh');
+        console.log(chalk.yellow('[ INFO ] Neues Terminal oeffnen oder `exec zsh` ausfuehren.'));
     } else {
-        runCommand('source ~/.bashrc');
+        console.log(chalk.yellow('[ INFO ] Neues Terminal oeffnen oder `source ~/.bashrc` ausfuehren.'));
     }
 })();
