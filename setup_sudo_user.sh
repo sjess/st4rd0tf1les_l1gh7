@@ -12,11 +12,11 @@ else
 fi
 
 # 2. Zur sudo-Gruppe hinzufügen
-usermod -aG sudo "$USERNAME"
+sudo usermod -aG sudo "$USERNAME"
 
 # 3. sudoers: %sudo Gruppe für passwortloses sudo anpassen
 echo "Aktualisiere /etc/sudoers ..."
-sed -i 's/^%sudo\s\+ALL=(ALL:ALL)\s\+ALL/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
+sudo sed -i 's/^%sudo\s\+ALL=(ALL:ALL)\s\+ALL/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/' /etc/sudoers
 
 # 4. Standardbenutzer in /etc/wsl.conf setzen
 if ! grep -q '^\[user\]' /etc/wsl.conf; then
