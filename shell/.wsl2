@@ -30,5 +30,8 @@ export PATH=/c/Windows/SysWOW64:$PATH
 
 export PATH=$HOME/.config/composer/vendor/bin:$PATH
 
+# Claude Code native installer; zsh does not read ~/.profile where Ubuntu adds this
+[[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
+
 # opencode
 export PATH=/home/sjess/.opencode/bin:$PATH

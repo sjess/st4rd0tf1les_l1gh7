@@ -1,0 +1,10 @@
+interface:
+  display_name: Design Critic
+  short_description: Strict UI design and originality audit
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true

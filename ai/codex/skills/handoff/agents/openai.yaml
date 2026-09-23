@@ -1,0 +1,7 @@
+interface:
+  display_name: "Handoff"
+  short_description: "Create a compact agent handoff"
+  default_prompt: "Use $handoff to create a concise handoff document for the next session."
+
+policy:
+  allow_implicit_invocation: true

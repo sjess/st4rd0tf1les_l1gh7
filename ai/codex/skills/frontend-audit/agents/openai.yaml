@@ -1,0 +1,10 @@
+interface:
+  display_name: Frontend Audit
+  short_description: Audit and redesign web UI without generic AI aesthetics
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
