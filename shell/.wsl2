@@ -34,4 +34,15 @@ export PATH=$HOME/.config/composer/vendor/bin:$PATH
 [[ -d "$HOME/.local/bin" ]] && export PATH="$HOME/.local/bin:$PATH"
 
 # opencode
-export PATH=/home/sjess/.opencode/bin:$PATH
+[[ -d "$HOME/.opencode/bin" ]] && export PATH="$HOME/.opencode/bin:$PATH"
+
+# NVM; the NVM installer only writes its loader to ~/.bashrc, which zsh ignores.
+# Loaded last so the NVM node comes before /usr/bin/node and Windows nodejs in PATH.
+export NVM_DIR="$HOME/.nvm"
+[[ -s "$NVM_DIR/nvm.sh" ]] && . "$NVM_DIR/nvm.sh"
+
+# Clean up PATH: drop duplicates (re-sourcing ~/.zshrc prepends again) and
+# directories that no longer exist, e.g. stale Windows entries inherited via
+# WSL interop after uninstalling a Windows app.
+typeset -U path
+path=(${^path}(N-/))

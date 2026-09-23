@@ -54,11 +54,19 @@ require_cmd() {
   fi
 }
 
-# When started standalone, npm from NVM is not on PATH yet
+# When started standalone, npm from NVM is not on PATH yet. Load NVM even if
+# an apt npm exists, so global packages land in the NVM node, not /usr.
 load_nvm() {
-  if ! command -v npm >/dev/null 2>&1 && [[ -s "${HOME}/.nvm/nvm.sh" ]]; then
-    # shellcheck disable=SC1091
-    . "${HOME}/.nvm/nvm.sh"
+  [[ -s "${HOME}/.nvm/nvm.sh" ]] || return 0
+  local current
+  # nvm.sh and its functions are not compatible with `set -u`
+  set +u
+  # shellcheck disable=SC1091
+  . "${HOME}/.nvm/nvm.sh"
+  current="$(nvm current 2>/dev/null || echo none)"
+  set -u
+  if [[ "$current" == "none" || "$current" == "system" ]]; then
+    log_warn "NVM hat kein Node aktiv; nutze $(command -v node || echo 'kein node'). Fix: nvm install --lts && nvm alias default 'lts/*'"
   fi
 }
 
