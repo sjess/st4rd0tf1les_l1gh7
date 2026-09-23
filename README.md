@@ -40,7 +40,7 @@ cd ~/.dotfiles
 ./install.sh
 ```
 
-`install.sh` installs NVM and the current Node.js, then starts the interactive setup (`index.js`). The repository must live in `~/.dotfiles`, the shell config references that path.
+`install.sh` installs NVM and the current Node.js LTS, then starts the interactive setup (`index.js`). The repository must live in `~/.dotfiles`, the shell config references that path.
 
 ### Always installed
 
