@@ -72,6 +72,24 @@ export_codex_config() {
   log_ok "${src} -> ${dest#"${REPO_DIR}/"}"
 }
 
+# Writes installed Claude plugins as "plugin@marketplace<TAB>github-repo"
+export_claude_plugins() {
+  local dest="${AI_DIR}/claude/plugins.tsv"
+  if ! command -v claude >/dev/null 2>&1; then
+    log_warn "claude fehlt; Plugins nicht exportiert"
+    return 0
+  fi
+
+  node -e '
+    const [plugins, markets] = process.argv.slice(1).map(s => JSON.parse(s));
+    const repo = Object.fromEntries(markets.map(m => [m.name, m.repo || ""]));
+    for (const p of plugins.filter(p => p.enabled && p.scope === "user")) {
+      console.log(`${p.id}\t${repo[p.id.split("@")[1]] || ""}`);
+    }
+  ' "$(claude plugin list --json)" "$(claude plugin marketplace list --json)" >"$dest"
+  log_ok "Claude Plugins -> ${dest#"${REPO_DIR}/"} ($(wc -l <"$dest") Stueck)"
+}
+
 main() {
   command -v rsync >/dev/null 2>&1 || { echo "[ ERROR ] rsync fehlt: sudo apt-get install -y rsync" >&2; exit 1; }
 
@@ -83,6 +101,7 @@ main() {
   export_dir "${CLAUDE_SRC}/get-shit-done" "${AI_DIR}/claude/get-shit-done"
   # skills/synced is managed by claude.ai account sync
   export_dir "${CLAUDE_SRC}/skills" "${AI_DIR}/claude/skills" --exclude 'synced/'
+  export_claude_plugins
 
   log_info "Codex"
   export_file "${CODEX_SRC}/AGENTS.md" "${AI_DIR}/codex/AGENTS.md"

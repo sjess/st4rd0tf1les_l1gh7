@@ -136,6 +136,40 @@ render_codex_config() {
   '
 }
 
+# Installs Claude plugins listed in ai/claude/plugins.tsv
+# ("plugin@marketplace<TAB>github-repo"); marketplaces are added when missing.
+install_claude_plugins() {
+  local list="${AI_DIR}/claude/plugins.tsv"
+  [[ -f "$list" ]] || return 0
+  if ! command -v claude >/dev/null 2>&1; then
+    log_warn "claude fehlt; Plugins uebersprungen"
+    return 0
+  fi
+
+  local installed markets id repo market
+  installed="$(claude plugin list --json)"
+  markets="$(claude plugin marketplace list --json)"
+
+  while IFS=$'\t' read -r id repo; do
+    [[ -n "$id" ]] || continue
+    market="${id#*@}"
+    if ! grep -q "\"name\": \"${market}\"" <<<"$markets"; then
+      if [[ -z "$repo" ]]; then
+        log_warn "Marketplace '${market}' unbekannt; ${id} uebersprungen"
+        continue
+      fi
+      claude plugin marketplace add "$repo" >/dev/null
+      markets="$(claude plugin marketplace list --json)"
+    fi
+    if grep -q "\"id\": \"${id}\"" <<<"$installed"; then
+      log_ok "Plugin ${id} bereits installiert"
+    else
+      claude plugin install "$id" >/dev/null
+      log_ok "Plugin ${id} installiert"
+    fi
+  done <"$list"
+}
+
 # The fetch MCP server in config.toml runs from its own venv
 install_fetch_mcp() {
   if [[ -x "${FETCH_MCP_VENV}/bin/python" ]] \
@@ -183,6 +217,7 @@ main() {
   sync_dir "${AI_DIR}/claude/agents" "${CLAUDE_DIR}/agents"
   sync_dir "${AI_DIR}/claude/get-shit-done" "${CLAUDE_DIR}/get-shit-done"
   sync_dir "${AI_DIR}/claude/skills" "${CLAUDE_DIR}/skills"
+  install_claude_plugins
 
   log_info "Codex Konfiguration"
   install_config_file "${AI_DIR}/codex/config.toml.template" "${CODEX_DIR}/config.toml" render_codex_config
