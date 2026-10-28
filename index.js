@@ -177,6 +177,38 @@ async function setupAiTools(inquirer) {
 }
 
 /**
+ * True when a command is on PATH.
+ */
+function hasCommand(cmd) {
+    return spawnSync('bash', ['-c', `command -v ${cmd}`], { stdio: 'ignore' }).status === 0;
+}
+
+/**
+ * Installs the GitHub CLI and ripgrep, each only when missing. gh comes from
+ * GitHub's apt repository, Ubuntu's own package lags behind.
+ */
+function installDevClis() {
+    if (hasCommand('rg')) {
+        console.log(chalk.yellow('[ SKIP ] ripgrep ist schon installiert'));
+    } else {
+        runCommand(`${APT} install -y ripgrep`, { ignoreOutput: true });
+        console.log(chalk.green('[ OK ] ripgrep installiert'));
+    }
+
+    if (hasCommand('gh')) {
+        console.log(chalk.yellow('[ SKIP ] GitHub CLI ist schon installiert'));
+        return;
+    }
+    const keyring = '/etc/apt/keyrings/githubcli-archive-keyring.gpg';
+    runCommand('sudo mkdir -p -m 755 /etc/apt/keyrings');
+    runCommand(`curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo tee ${keyring} > /dev/null`);
+    runCommand(`sudo chmod go+r ${keyring}`);
+    runCommand(`echo "deb [arch=$(dpkg --print-architecture) signed-by=${keyring}] https://cli.github.com/packages stable main" | sudo tee ${APT_SOURCES_DIR}/github-cli.list > /dev/null`);
+    runCommand(`${APT} update -y && ${APT} install -y gh`, { ignoreOutput: true });
+    console.log(chalk.green('[ OK ] GitHub CLI installiert (anmelden: gh auth login)'));
+}
+
+/**
  * Installs an array of packages displaying a progress bar.
  */
 async function installPackages(title, pkgs) {
@@ -285,6 +317,12 @@ async function installPackages(title, pkgs) {
         'libpango-1.0-0', 'libstdc++6', 'libx11-6', 'libxext6', 'libxrender1', 'libxss1', 'libxtst6',
         'libatomic1', 'lsb-release', 'xdg-utils', 'wget', 'fzf', 'fontconfig'
     ]);
+
+    // 6. Developer CLIs (GitHub CLI, ripgrep), skipped where already present
+    console.log(chalk.blue(`\n[ START ] GitHub CLI & ripgrep`));
+    t0 = Date.now();
+    installDevClis();
+    console.log(chalk.green(`[ DONE ] GitHub CLI & ripgrep in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 7. Oh-My-Zsh & plugins
     if (answers.zsh) {

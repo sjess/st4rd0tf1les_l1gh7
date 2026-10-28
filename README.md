@@ -45,6 +45,7 @@ cd ~/.dotfiles
 ### Always installed
 
 - System update, build tools, git, curl, ffmpeg, htop, rsync, fzf
+- GitHub CLI (`gh`, from GitHub's apt repository) and ripgrep, skipped when already installed
 - Python 3 with pip and venv
 - Libraries for headless browsers (Playwright)
 - Nerd Fonts via [getnf](https://github.com/ronniedroid/getnf)
