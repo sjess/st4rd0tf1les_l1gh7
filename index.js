@@ -5,7 +5,7 @@
 const chalk = require('chalk');
 const dim = chalk.dim;
 const cliProgress = require('cli-progress');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
@@ -22,6 +22,10 @@ const MIN_NODE_VERSION = '>=20.19.0';
 // sudo resets the environment, so the frontend must be passed inline
 const APT = 'sudo DEBIAN_FRONTEND=noninteractive apt-get';
 const APT_KEEP_CONFIGS = '-o Dpkg::Options::=--force-confdef -o Dpkg::Options::=--force-confold';
+
+const AI_SETUP_REPO = 'git@github.com:sjess/ai-setup.git';
+// First connection to GitHub must not stop at the host key prompt
+const GIT_SSH = 'ssh -o StrictHostKeyChecking=accept-new';
 
 const APT_SOURCES_DIR = '/etc/apt/sources.list.d';
 const APT_SOURCES_BACKUP_DIR = '/var/backups/wsl-dev-bootstrap';
@@ -107,6 +111,68 @@ function removeOndrejPhpRepo() {
     for (const file of stale) {
         runCommand(`sudo mv "${path.join(APT_SOURCES_DIR, file)}" "${APT_SOURCES_BACKUP_DIR}/"`);
         console.log(chalk.yellow(`[ WARN ] ${file} deaktiviert (Backup: ${APT_SOURCES_BACKUP_DIR})`));
+    }
+}
+
+/**
+ * True when GitHub accepts this machine's SSH key (needed for the private ai-setup repo).
+ */
+function githubSshWorks() {
+    const res = spawnSync('ssh', ['-o', 'BatchMode=yes', '-o', 'StrictHostKeyChecking=accept-new', '-T', 'git@github.com'],
+        { encoding: 'utf8', timeout: 20000 });
+    return /successfully authenticated/.test(`${res.stdout}${res.stderr}`);
+}
+
+function publicSshKey() {
+    for (const name of ['id_ed25519.pub', 'id_rsa.pub']) {
+        const file = path.join(process.env.HOME, '.ssh', name);
+        if (fs.existsSync(file)) {
+            return fs.readFileSync(file, 'utf8').trim();
+        }
+    }
+    return null;
+}
+
+/**
+ * Clones or updates the private ai-setup repo and runs its installer. Waits
+ * until the SSH key is registered on GitHub, or lets the user skip.
+ */
+async function setupAiTools(inquirer) {
+    const aiSetupDir = path.join(process.env.HOME, 'repositories/ai-setup');
+    const later = `git clone ${AI_SETUP_REPO} ${aiSetupDir} && bash ${aiSetupDir}/install.sh`;
+
+    while (!githubSshWorks()) {
+        const key = publicSshKey();
+        console.log(chalk.yellow('[ WARN ] GitHub akzeptiert den SSH-Key noch nicht (ai-setup ist privat).'));
+        if (key) {
+            console.log(`Key eintragen unter https://github.com/settings/ssh/new :\n\n${key}\n`);
+        } else {
+            console.log('Kein SSH-Key in ~/.ssh gefunden. Erst einen erzeugen: ssh-keygen -t ed25519');
+        }
+        const { retry } = await inquirer.prompt([
+            { type: 'confirm', name: 'retry', message: 'Key eingetragen? Nochmal pruefen (Nein = KI-Tools ueberspringen)' }
+        ]);
+        if (!retry) {
+            console.log(chalk.yellow(`[ SKIP ] KI-Tools. Spaeter nachholen mit:\n  ${later}`));
+            return;
+        }
+    }
+
+    const env = { ...process.env, GIT_SSH_COMMAND: GIT_SSH };
+    try {
+        if (fs.existsSync(path.join(aiSetupDir, '.git'))) {
+            // local edits or commits in ai-setup are normal; ai-sync handles updating later
+            try {
+                runCommand(`git -C "${aiSetupDir}" pull --ff-only`, { env });
+            } catch {
+                console.log(chalk.yellow(`[ WARN ] ${aiSetupDir} nicht aktualisiert (lokale Aenderungen?); weiter mit dem vorhandenen Stand`));
+            }
+        } else {
+            runCommand(`git clone ${AI_SETUP_REPO} "${aiSetupDir}"`, { env });
+        }
+        runCommand(`bash "${path.join(aiSetupDir, 'install.sh')}"`);
+    } catch {
+        console.log(chalk.red(`[ ERROR ] KI-Tools (ai-setup) fehlgeschlagen; spaeter nachholen mit:\n  ${later}`));
     }
 }
 
@@ -288,27 +354,6 @@ async function installPackages(title, pkgs) {
         );
     }
 
-    // 10. AI tools (Claude Code, Codex, opencode) from the separate ai-setup repo
-    console.log(chalk.blue(`\n[ START ] KI-Tools (ai-setup) installieren`));
-    t0 = Date.now();
-    const aiSetupDir = path.join(process.env.HOME, 'repositories/ai-setup');
-    try {
-        if (fs.existsSync(path.join(aiSetupDir, '.git'))) {
-            // local edits or commits in ai-setup are normal; ai-sync handles updating later
-            try {
-                runCommand(`git -C "${aiSetupDir}" pull --ff-only`);
-            } catch {
-                console.log(chalk.yellow(`[ WARN ] ${aiSetupDir} nicht aktualisiert (lokale Aenderungen?); weiter mit dem vorhandenen Stand`));
-            }
-        } else {
-            runCommand(`git clone https://github.com/sjess/ai-setup.git "${aiSetupDir}"`);
-        }
-        runCommand(`bash "${path.join(aiSetupDir, 'install.sh')}"`);
-        console.log(chalk.green(`[ DONE ] KI-Tools (ai-setup) in ${Math.round((Date.now() - t0) / 1000)}s`));
-    } catch {
-        console.log(chalk.red(`[ ERROR ] KI-Tools (ai-setup) fehlgeschlagen; spaeter nachholen mit: bash ${path.join(aiSetupDir, 'install.sh')}`));
-    }
-
     // 11. + 12. Composer & Laravel installer require PHP
     if (answers.php) {
         console.log(chalk.blue(`\n[ START ] Composer installieren`));
@@ -355,6 +400,13 @@ async function installPackages(title, pkgs) {
         runCommand('ssh-keygen -t rsa -b 4096 -C "$USER@$HOSTNAME"');
         console.log(chalk.green(`[ DONE ] SSH-Key generiert in ~/.ssh in ${Math.round((Date.now() - t0) / 1000)}s`));
     }
+
+    // 15b. AI tools (Claude Code, Codex, opencode) from the private ai-setup repo.
+    // Runs after the SSH key step, because cloning needs a key known to GitHub.
+    console.log(chalk.blue(`\n[ START ] KI-Tools (ai-setup) installieren`));
+    t0 = Date.now();
+    await setupAiTools(inquirer);
+    console.log(chalk.green(`[ DONE ] KI-Tools (ai-setup) in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 16. Cleanup
     console.log(chalk.blue('[ START ] Säubern'));

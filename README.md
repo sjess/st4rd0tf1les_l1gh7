@@ -65,7 +65,9 @@ When the setup is done, open a new terminal.
 
 ## AI tools
 
-Claude Code, Codex and opencode are set up by the separate repo [ai-setup](https://github.com/sjess/ai-setup). `index.js` clones it to `~/repositories/ai-setup` (or pulls it if it exists) and runs its `install.sh`. Instructions, skills, MCP servers, plugins and mods live there.
+Claude Code, Codex and opencode are set up by the separate private repo [ai-setup](https://github.com/sjess/ai-setup). As the last step, `index.js` clones it via SSH to `~/repositories/ai-setup` (or pulls it if it exists) and runs its `install.sh`. Instructions, skills, MCP servers, plugins and mods live there.
+
+Cloning needs an SSH key known to GitHub. If GitHub doesn't accept the key yet, the setup shows the public key and waits until you have added it at https://github.com/settings/ssh/new, or lets you skip the step.
 
 Log in after the setup:
 
