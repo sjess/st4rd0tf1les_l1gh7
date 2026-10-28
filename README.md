@@ -3,7 +3,7 @@
 
 # st4rd0tf1les
 
-Bootstrap for a WSL2 development environment on Windows 11: ZSH with powerlevel10k, PHP, Node.js, Python, Claude Code, Codex and opencode, including shell aliases, functions and AI tool configuration.
+Bootstrap for a WSL2 development environment on Windows 11: ZSH with powerlevel10k, PHP, Node.js, Python, Claude Code, Codex and opencode, including shell aliases and functions. The AI tools and their configuration come from the separate repo [ai-setup](https://github.com/sjess/ai-setup).
 
 ## Requirements
 
@@ -45,10 +45,10 @@ cd ~/.dotfiles
 ### Always installed
 
 - System update, build tools, git, curl, ffmpeg, htop, rsync, fzf
-- Python 3 with pip and venv, MCP fetch server
+- Python 3 with pip and venv
 - Libraries for headless browsers (Playwright)
 - Nerd Fonts via [getnf](https://github.com/ronniedroid/getnf)
-- [Claude Code](https://docs.claude.com/en/docs/claude-code) and [Codex](https://github.com/openai/codex) with skills, agents and MCP servers (see below)
+- Claude Code, Codex and opencode with skills, MCP servers and plugins via [ai-setup](https://github.com/sjess/ai-setup) (see below)
 - `/etc/wsl.conf` from `shell/wsl.conf` (**replaces the existing file**)
 
 ### Optional (asked at start)
@@ -58,7 +58,6 @@ cd ~/.dotfiles
 | PHP 8 | PHP with common extensions, Composer, Laravel installer; on Ubuntu optionally `ppa:ondrej/php` |
 | oh-my-zsh | ZSH as login shell, oh-my-zsh, powerlevel10k, zsh-autosuggestions, zsh-syntax-highlighting |
 | NPM packages | global `ffmpeg-progressbar-cli` |
-| opencode | [opencode](https://opencode.ai) with the config from `.opencode/` |
 | Git | `user.name` and `user.email` |
 | SSH key | new key in `~/.ssh` |
 
@@ -66,34 +65,17 @@ When the setup is done, open a new terminal.
 
 ## AI tools
 
-The global configuration of Claude Code and Codex lives in `ai/`:
+Claude Code, Codex and opencode are set up by the separate repo [ai-setup](https://github.com/sjess/ai-setup). `index.js` clones it to `~/repositories/ai-setup` (or pulls it if it exists) and runs its `install.sh`. Instructions, skills, MCP servers, plugins and mods live there.
 
-- `ai/claude/`: `settings.json`, agents, GSD (get-shit-done)
-- `ai/codex/`: `AGENTS.md`, `config.toml` (as template), agents, prompts, skills
-
-Credentials are not part of the repository. Log in after the setup:
+Log in after the setup:
 
 ```bash
 claude
 codex login
+opencode auth login
 ```
 
-Update the repository after changing skills, agents or MCP servers on your machine:
-
-```bash
-./scripts/export_ai_config.sh
-git status ai/
-```
-
-Apply the configuration without running the full setup:
-
-```bash
-./scripts/install_ai_tools.sh             # install CLIs and config
-./scripts/install_ai_tools.sh --skip-cli  # config only
-./scripts/install_ai_tools.sh --force     # also replace existing settings.json / config.toml
-```
-
-`settings.json`, `config.toml` and `opencode.json` are only written when missing, because the tools change them themselves. `__HOME__` in the templates is replaced with your home directory. Replaced files are backed up to `~/.local/state/wsl-dev-bootstrap/backups/`.
+Keep the AI configuration in sync on any machine with `ai-sync`; see the ai-setup README.
 
 ## Windows Terminal
 
@@ -112,9 +94,6 @@ Use the distribution name shown by `wsl -l -v`.
 ├── install.sh            # NVM + Node.js, starts index.js
 ├── index.js              # interactive setup
 ├── setup_sudo_user.sh    # create sudo user (as root)
-├── scripts/              # export / install AI tool config
-├── ai/                   # Claude Code and Codex config
-├── .opencode/            # opencode config and skills
 ├── shell/                # .wsl2 (zshrc), .aliases, .functions, wsl.conf
 ├── themes/               # powerlevel10k theme
 └── misc/                 # fonts, cheat sheet

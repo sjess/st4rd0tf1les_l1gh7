@@ -111,25 +111,6 @@ function removeOndrejPhpRepo() {
 }
 
 /**
- * Renders a config template (__HOME__ -> $HOME). Only writes when the target is
- * missing, because the tool may have changed its own config since.
- */
-function installTemplate(src, dest) {
-    if (!fs.existsSync(src)) {
-        return;
-    }
-    const rendered = fs.readFileSync(src, 'utf8').replaceAll('__HOME__', process.env.HOME);
-
-    if (!fs.existsSync(dest)) {
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-        fs.writeFileSync(dest, rendered);
-        console.log(chalk.green(`[ OK ] ${dest} geschrieben`));
-    } else if (fs.readFileSync(dest, 'utf8') !== rendered) {
-        console.log(chalk.yellow(`[ WARN ] ${dest} weicht von ${path.basename(src)} ab; behalten`));
-    }
-}
-
-/**
  * Installs an array of packages displaying a progress bar.
  */
 async function installPackages(title, pkgs) {
@@ -182,7 +163,6 @@ async function installPackages(title, pkgs) {
         { type: 'confirm', name: 'ppa', message: 'PPA:ondrej/php hinzufügen?', when: a => a.php && a.distro === 'Ubuntu' },
         { type: 'confirm', name: 'zsh', message: 'Installiere oh-my-zsh?' },
         { type: 'confirm', name: 'npm', message: 'Globale NPM-Pakete installieren?' },
-        { type: 'confirm', name: 'opencode', message: 'Opencode installieren?' },
         { type: 'confirm', name: 'git', message: 'GIT konfigurieren?' },
         { type: 'confirm', name: 'ssh', message: 'SSH-Key generieren?' }
     ]);
@@ -231,11 +211,6 @@ async function installPackages(title, pkgs) {
 
     // 4. Python3 & Pip3
     await installPackages('Python3 & Pip3', ['python3', 'python3-pip', 'python3-venv']);
-
-    // 4b. MCP fetch server
-    runCommand('python3 -m venv ~/.venvs/mcp-fetch', { ignoreOutput: true });
-    runCommand('~/.venvs/mcp-fetch/bin/pip install -U pip', { ignoreOutput: true });
-    runCommand('~/.venvs/mcp-fetch/bin/pip install mcp-server-fetch', { ignoreOutput: true });
 
     // 5. Miscellaneous libraries
     await installPackages('Misc Libraries', [
@@ -313,30 +288,17 @@ async function installPackages(title, pkgs) {
         );
     }
 
-    // 10. opencode installation
-    if (answers.opencode) {
-        console.log(chalk.blue(`\n[ START ] opencode installieren`));
-        t0 = Date.now();
-        runCommand('curl -fsSL https://opencode.ai/install | bash');
-        const dotfilesOpencode = path.join(__dirname, '.opencode');
-        if (fs.existsSync(dotfilesOpencode)) {
-            // "dir/." instead of "dir/*" so dot entries like skills/.system are included;
-            // replaced files are backed up, local-only files are kept
-            const backupDir = path.join(process.env.HOME, '.local/state/wsl-dev-bootstrap/backups/opencode');
-            runCommand(`rsync -a --backup --backup-dir="${backupDir}" --exclude '*.template' "${dotfilesOpencode}/." "${process.env.HOME}/.opencode/"`);
-            installTemplate(
-                path.join(dotfilesOpencode, 'opencode.json.template'),
-                path.join(process.env.HOME, '.opencode/opencode.json')
-            );
-        }
-        console.log(chalk.green(`[ DONE ] opencode installieren in ${Math.round((Date.now() - t0) / 1000)}s`));
-    }
-
-    // 10b. Claude Code & Codex with the config exported to ai/ (always installed)
-    console.log(chalk.blue(`\n[ START ] Claude Code & Codex installieren`));
+    // 10. AI tools (Claude Code, Codex, opencode) from the separate ai-setup repo
+    console.log(chalk.blue(`\n[ START ] KI-Tools (ai-setup) installieren`));
     t0 = Date.now();
-    runCommand(`bash "${path.join(__dirname, 'scripts/install_ai_tools.sh')}"`);
-    console.log(chalk.green(`[ DONE ] Claude Code & Codex in ${Math.round((Date.now() - t0) / 1000)}s`));
+    const aiSetupDir = path.join(process.env.HOME, 'repositories/ai-setup');
+    if (fs.existsSync(path.join(aiSetupDir, '.git'))) {
+        runCommand(`git -C "${aiSetupDir}" pull --ff-only`);
+    } else {
+        runCommand(`git clone https://github.com/sjess/ai-setup.git "${aiSetupDir}"`);
+    }
+    runCommand(`bash "${path.join(aiSetupDir, 'install.sh')}"`);
+    console.log(chalk.green(`[ DONE ] KI-Tools (ai-setup) in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 11. + 12. Composer & Laravel installer require PHP
     if (answers.php) {
