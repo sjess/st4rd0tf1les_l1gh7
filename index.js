@@ -292,13 +292,22 @@ async function installPackages(title, pkgs) {
     console.log(chalk.blue(`\n[ START ] KI-Tools (ai-setup) installieren`));
     t0 = Date.now();
     const aiSetupDir = path.join(process.env.HOME, 'repositories/ai-setup');
-    if (fs.existsSync(path.join(aiSetupDir, '.git'))) {
-        runCommand(`git -C "${aiSetupDir}" pull --ff-only`);
-    } else {
-        runCommand(`git clone https://github.com/sjess/ai-setup.git "${aiSetupDir}"`);
+    try {
+        if (fs.existsSync(path.join(aiSetupDir, '.git'))) {
+            // local edits or commits in ai-setup are normal; ai-sync handles updating later
+            try {
+                runCommand(`git -C "${aiSetupDir}" pull --ff-only`);
+            } catch {
+                console.log(chalk.yellow(`[ WARN ] ${aiSetupDir} nicht aktualisiert (lokale Aenderungen?); weiter mit dem vorhandenen Stand`));
+            }
+        } else {
+            runCommand(`git clone https://github.com/sjess/ai-setup.git "${aiSetupDir}"`);
+        }
+        runCommand(`bash "${path.join(aiSetupDir, 'install.sh')}"`);
+        console.log(chalk.green(`[ DONE ] KI-Tools (ai-setup) in ${Math.round((Date.now() - t0) / 1000)}s`));
+    } catch {
+        console.log(chalk.red(`[ ERROR ] KI-Tools (ai-setup) fehlgeschlagen; spaeter nachholen mit: bash ${path.join(aiSetupDir, 'install.sh')}`));
     }
-    runCommand(`bash "${path.join(aiSetupDir, 'install.sh')}"`);
-    console.log(chalk.green(`[ DONE ] KI-Tools (ai-setup) in ${Math.round((Date.now() - t0) / 1000)}s`));
 
     // 11. + 12. Composer & Laravel installer require PHP
     if (answers.php) {
